@@ -3,47 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPD Online Database System</title>
+    <title>BPD Analytica Enterprise v3.0</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
-        .input-group label { display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
-        .glass-card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; }
-        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; items-center: center; color: white; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .input-group label { display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; margin-left: 2px; }
+        .glass-card { background: white; border: 1px solid #e2e8f0; border-radius: 1.25rem; }
+        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); z-index: 999; justify-content: center; align-items: center; color: white; flex-direction: column; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div id="loading" class="loading-overlay">Menyambungkan ke Server...</div>
+    <div id="loading" class="loading-overlay">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+        <p class="font-bold tracking-widest">SINKRONISASI CLOUD...</p>
+    </div>
 
-    <header class="bg-blue-900 text-white p-6 rounded-2xl shadow-xl mb-8 flex flex-col lg:flex-row justify-between items-center gap-6">
-        <div>
-            <h1 class="text-2xl font-bold italic text-white">BPD<span class="text-blue-400">Cloud</span> Analytics</h1>
-            <p class="text-xs opacity-70 italic font-bold text-red-400">● LIVE DATABASE CONNECTED</p>
+    <header class="bg-slate-900 text-white p-6 rounded-3xl shadow-2xl mb-8 flex flex-col lg:flex-row justify-between items-center gap-6">
+        <div class="text-center lg:text-left">
+            <h1 class="text-3xl font-extrabold tracking-tight italic">BPD<span class="text-blue-400">Analytica</span> <span class="text-sm font-light border border-blue-400 px-2 py-1 rounded-full ml-2 not-italic">Enterprise v3.0</span></h1>
+            <p class="text-slate-400 text-sm mt-1">Sistem Database Online & Ranking Regional BPD se-Indonesia</p>
         </div>
-        <div class="flex flex-wrap gap-2 no-print">
-            <button onclick="downloadTemplate()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-[10px] font-bold">TEMPLATE</button>
-            <label class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-[10px] font-bold cursor-pointer">
-                IMPORT EXCEL <input type="file" id="importFile" class="hidden" accept=".xlsx, .xls" onchange="importExcel(event)">
+        <div class="flex flex-wrap justify-center gap-3 no-print">
+            <button onclick="downloadTemplate()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-xs font-bold transition">Template Excel</button>
+            <label class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition">
+                Import Excel <input type="file" id="importFile" class="hidden" accept=".xlsx, .xls" onchange="importExcel(event)">
             </label>
-            <button onclick="exportExcel()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-[10px] font-bold">EXPORT ALL</button>
+            <button onclick="exportExcel()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-xs font-bold transition">Export Master</button>
+            <button onclick="window.print()" class="bg-white text-slate-900 hover:bg-slate-100 px-4 py-2 rounded-xl text-xs font-bold transition">Cetak PDF</button>
         </div>
     </header>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         <div class="lg:col-span-4 no-print">
-            <div class="glass-card p-6 shadow-sm sticky top-6">
-                <h2 class="text-lg font-bold mb-4 border-b pb-2">Input Data</h2>
-                <form id="bankForm" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
+            <div class="glass-card p-6 shadow-sm sticky top-6 max-h-[90vh] overflow-y-auto">
+                <h2 class="text-lg font-bold mb-6 text-slate-800 flex items-center gap-2">
+                    <div class="w-1.5 h-5 bg-blue-600 rounded-full"></div> Entry Data Cloud
+                </h2>
+                <form id="bankForm" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4 border-b pb-4">
                         <div class="col-span-2 input-group">
-                            <label>Nama Bank BPD</label>
-                            <select id="bankName" class="w-full p-2 border rounded-lg bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <label>Bank BPD</label>
+                            <select id="bankName" class="w-full p-2.5 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih Bank --</option>
                                 <option>BPD BJB</option><option>BPD JATIM</option><option>BPD JATENG</option><option>BPD DKI</option>
                                 <option>BPD KALTIMTARA</option><option>BPD SUMUT</option><option>BPD PAPUA</option>
@@ -56,10 +61,10 @@
                                 <option>BPD BENGKULU</option><option>BPD BANTEN</option>
                             </select>
                         </div>
-                        <div class="input-group"><label>Tahun</label><input type="number" id="tahun" class="w-full p-2 border rounded-lg"></div>
+                        <div class="input-group"><label>Tahun</label><input type="number" id="tahun" class="w-full p-2 border rounded-xl"></div>
                         <div class="input-group">
                             <label>Bulan</label>
-                            <select id="bulan" onchange="toggleRasio()" class="w-full p-2 border rounded-lg">
+                            <select id="bulan" onchange="toggleRasio()" class="w-full p-2 border rounded-xl">
                                 <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
                                 <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
                                 <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
@@ -68,84 +73,116 @@
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-bold text-blue-600 border-b pb-1 uppercase tracking-tighter">Pos Keuangan (Jutaan Rp)</h3>
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-black text-blue-600 uppercase tracking-widest flex justify-between">
+                            Pos Keuangan <span class="lowercase font-normal text-slate-400">jutaan rp</span>
+                        </h3>
                         <div class="grid grid-cols-2 gap-3">
                             <div class="input-group"><label>Aset</label><input type="number" id="aset" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>Kredit</label><input type="number" id="kredit" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>Giro</label><input type="number" id="giro" oninput="calcLogic()" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>Tabungan</label><input type="number" id="tabungan" oninput="calcLogic()" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>Deposito</label><input type="number" id="deposito" oninput="calcLogic()" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>Total DPK</label><input type="number" id="dpk" class="w-full p-2 border rounded-lg text-sm bg-slate-100 font-bold" readonly></div>
                             <div class="input-group"><label>Laba</label><input type="number" id="laba" class="w-full p-2 border rounded-lg text-sm"></div>
-                            <div class="input-group"><label>Giro</label><input type="number" id="giro" oninput="calc()" class="w-full p-2 border rounded-lg text-sm"></div>
-                            <div class="input-group"><label>Tabungan</label><input type="number" id="tabungan" oninput="calc()" class="w-full p-2 border rounded-lg text-sm"></div>
-                            <div class="input-group"><label>Deposito</label><input type="number" id="deposito" oninput="calc()" class="w-full p-2 border rounded-lg text-sm"></div>
-                            <div class="input-group"><label>DPK (Auto)</label><input type="number" id="dpk" class="w-full p-2 border rounded-lg text-sm bg-gray-100 font-bold" readonly></div>
+                            <div class="input-group"><label>CKPN</label><input type="number" id="ckpn" class="w-full p-2 border rounded-lg text-sm"></div>
                         </div>
                     </div>
 
-                    <div id="rasioSection" class="hidden bg-orange-50 p-3 rounded-lg border border-orange-100 space-y-3">
-                        <h3 class="text-xs font-bold text-orange-600 uppercase">Rasio (%)</h3>
-                        <div class="grid grid-cols-2 gap-2">
+                    <div id="rasioSection" class="hidden space-y-4 bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                        <h3 class="text-xs font-black text-orange-600 uppercase tracking-widest flex justify-between">
+                            Rasio Keuangan <span class="lowercase font-normal text-orange-400">%</span>
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="input-group"><label>KPMM</label><input type="number" id="kpmm" class="w-full p-2 border rounded-lg text-sm"></div>
                             <div class="input-group"><label>ROA</label><input type="number" id="roa" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>ROE</label><input type="number" id="roe" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>NPL Gross</label><input type="number" id="nplg" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>NPL Net</label><input type="number" id="npln" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>BOPO</label><input type="number" id="bopo" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>NIM</label><input type="number" id="nim" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>LDR</label><input type="number" id="ldr" class="w-full p-2 border rounded-lg text-sm"></div>
                             <div class="input-group"><label>CASA (%)</label><input type="number" id="casa" class="w-full p-2 border rounded-lg text-sm bg-white font-bold" readonly></div>
                         </div>
                     </div>
 
-                    <button type="button" onclick="pushToCloud()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">SIMPAN KE CLOUD</button>
+                    <button type="button" onclick="pushToCloud()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-blue-600 transition-all shadow-lg">SIMPAN KE DATABASE CLOUD</button>
                 </form>
             </div>
         </div>
 
-        <div class="lg:col-span-8 space-y-6">
-            <div class="glass-card p-4 flex items-center justify-between">
-                <div class="flex gap-4 items-center">
-                    <select id="filterBulan" onchange="fetchData()" class="p-2 border rounded-lg font-bold text-sm">
-                        <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
-                        <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
-                        <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
-                        <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
-                    </select>
-                    <input type="number" id="filterTahun" oninput="fetchData()" class="w-24 p-2 border rounded-lg font-bold text-sm">
+        <div class="lg:col-span-8 space-y-8">
+            <div class="glass-card p-6 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="input-group !mb-0">
+                        <label>Filter Periode</label>
+                        <div class="flex gap-2">
+                            <select id="filterBulan" onchange="fetchFromCloud()" class="p-2 border rounded-xl text-sm font-bold bg-white">
+                                <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+                                <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+                                <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+                                <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+                            </select>
+                            <input type="number" id="filterTahun" oninput="fetchFromCloud()" class="w-24 p-2 border rounded-xl text-sm font-bold text-center">
+                        </div>
+                    </div>
                 </div>
-                <div class="flex bg-gray-100 p-1 rounded-lg">
-                    <button onclick="changeMetric('aset')" id="btnAset" class="px-4 py-1.5 rounded-md text-xs font-bold bg-white text-blue-600 shadow-sm">ASET</button>
-                    <button onclick="changeMetric('laba')" id="btnLaba" class="px-4 py-1.5 rounded-md text-xs font-bold text-gray-500">LABA</button>
+                <div class="flex bg-slate-100 p-1.5 rounded-xl gap-1">
+                    <button onclick="changeMetric('aset')" id="btnAset" class="px-5 py-2 rounded-lg text-xs font-bold bg-white shadow-sm text-blue-600">ASET</button>
+                    <button onclick="changeMetric('laba')" id="btnLaba" class="px-5 py-2 rounded-lg text-xs font-bold text-slate-500">LABA</button>
+                    <button onclick="changeMetric('kredit')" id="btnKredit" class="px-5 py-2 rounded-lg text-xs font-bold text-slate-500">KREDIT</button>
                 </div>
             </div>
 
-            <div class="glass-card p-6 h-[350px]">
-                <canvas id="mainChart"></canvas>
+            <div class="glass-card p-8">
+                <h2 class="text-xl font-bold text-slate-800 mb-6 flex justify-between">
+                    Visualisasi Ranking Regional
+                    <span id="labelPeriode" class="text-sm font-normal text-slate-400 tracking-widest"></span>
+                </h2>
+                <div class="h-[400px]">
+                    <canvas id="mainChart"></canvas>
+                </div>
             </div>
 
             <div class="glass-card overflow-hidden">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-50 border-b">
-                        <tr>
-                            <th class="p-4 text-xs font-bold">Rank</th>
-                            <th class="p-4 text-xs font-bold">Bank</th>
-                            <th class="p-4 text-right text-xs font-bold">Aset (Juta)</th>
-                            <th class="p-4 text-right text-xs font-bold">Laba (Juta)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="divide-y"></tbody>
-                </table>
+                <div class="p-6 border-b flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-slate-800">Peringkat Bank Regional</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b">
+                            <tr>
+                                <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Rank</th>
+                                <th class="p-4 text-[10px] font-black text-slate-400 uppercase">Bank BPD</th>
+                                <th class="p-4 text-right text-[10px] font-black text-slate-400 uppercase">Aset (Juta)</th>
+                                <th class="p-4 text-right text-[10px] font-black text-slate-400 uppercase">Laba (Juta)</th>
+                                <th class="p-4 text-center text-[10px] font-black text-slate-400 uppercase">CASA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankingTableBody" class="divide-y divide-slate-100">
+                            </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // PENTING: GANTI DENGAN URL FIREBASE ANDA
+        // PENTING: GANTI DENGAN URL FIREBASE ANDA SENDIRI
         const FIREBASE_URL = "https://monitoring-bpd-default-rtdb.asia-southeast1.firebasedatabase.app"; 
 
         let chart;
-        let metric = 'aset';
+        let activeMetric = 'aset';
 
         window.onload = () => {
-            const y = new Date().getFullYear();
-            document.getElementById('tahun').value = y;
-            document.getElementById('filterTahun').value = y;
-            document.getElementById('filterBulan').value = new Date().getMonth() + 1;
-            fetchData();
+            const now = new Date();
+            document.getElementById('tahun').value = now.getFullYear();
+            document.getElementById('filterTahun').value = now.getFullYear();
+            document.getElementById('filterBulan').value = now.getMonth() + 1;
+            fetchFromCloud();
         };
 
-        function calc() {
+        function calcLogic() {
             const g = parseFloat(document.getElementById('giro').value) || 0;
             const t = parseFloat(document.getElementById('tabungan').value) || 0;
             const d = parseFloat(document.getElementById('deposito').value) || 0;
@@ -159,72 +196,73 @@
             document.getElementById('rasioSection').classList.toggle('hidden', ![3, 6, 9, 12].includes(b));
         }
 
-        // SIMPAN DATA KE FIREBASE
         async function pushToCloud() {
             const bank = document.getElementById('bankName').value;
             const bln = document.getElementById('bulan').value;
             const thn = document.getElementById('tahun').value;
-            if(!bank) return alert("Pilih Bank!");
+            if(!bank) return alert("Pilih Nama Bank!");
 
             const data = {
                 bank, 
                 bulan: parseInt(bln), 
                 tahun: parseInt(thn),
                 aset: parseFloat(document.getElementById('aset').value) || 0,
+                kredit: parseFloat(document.getElementById('kredit').value) || 0,
                 laba: parseFloat(document.getElementById('laba').value) || 0,
                 dpk: parseFloat(document.getElementById('dpk').value) || 0,
-                casa: parseFloat(document.getElementById('casa').value) || 0
+                casa: parseFloat(document.getElementById('casa').value) || 0,
+                kpmm: parseFloat(document.getElementById('kpmm').value) || 0,
+                roa: parseFloat(document.getElementById('roa').value) || 0,
+                nplg: parseFloat(document.getElementById('nplg').value) || 0
             };
 
-            // ID unik berdasarkan Bank-Bulan-Tahun
             const id = `${bank}-${bln}-${thn}`.replace(/\s/g, '_');
-            
             document.getElementById('loading').style.display = 'flex';
+            
             try {
                 await fetch(`${FIREBASE_URL}/data/${id}.json`, {
                     method: 'PUT',
                     body: JSON.stringify(data)
                 });
-                alert("Berhasil disimpan ke Server Cloud!");
-                fetchData();
-            } catch (e) {
-                alert("Gagal menyimpan. Periksa URL Firebase Anda.");
-            }
+                alert("Data Tersimpan di Cloud!");
+                fetchFromCloud();
+            } catch (e) { alert("Gagal Simpan ke Cloud."); }
             document.getElementById('loading').style.display = 'none';
         }
 
-        // AMBIL DATA DARI FIREBASE
-        async function fetchData() {
-            const b = parseInt(document.getElementById('filterBulan').value);
-            const t = parseInt(document.getElementById('filterTahun').value);
-
+        async function fetchFromCloud() {
+            const fb = parseInt(document.getElementById('filterBulan').value);
+            const ft = parseInt(document.getElementById('filterTahun').value);
+            
             try {
                 const res = await fetch(`${FIREBASE_URL}/data.json`);
                 const allData = await res.json();
-                
-                let list = [];
+                let filtered = [];
                 if(allData) {
-                    list = Object.values(allData).filter(i => i.bulan === b && i.tahun === t);
+                    filtered = Object.values(allData).filter(i => i.bulan === fb && i.tahun === ft);
                 }
-                renderUI(list);
-            } catch (e) {
-                console.log("Error fetching data");
-            }
+                renderUI(filtered);
+            } catch (e) { console.error("Cloud connection failed."); }
         }
 
         function renderUI(data) {
-            data.sort((a, b) => b[metric] - a[metric]);
+            data.sort((a,b) => b[activeMetric] - a[activeMetric]);
             
-            // Tabel
-            const body = document.getElementById('tableBody');
-            body.innerHTML = data.length ? '' : '<tr><td colspan="4" class="p-10 text-center">No Data</td></tr>';
-            data.forEach((item, i) => {
-                body.innerHTML += `
-                    <tr>
-                        <td class="p-4 font-bold text-gray-400">#${i+1}</td>
-                        <td class="p-4 font-bold">${item.bank}</td>
-                        <td class="p-4 text-right">${item.aset.toLocaleString()}</td>
-                        <td class="p-4 text-right text-emerald-600 font-bold">${item.laba.toLocaleString()}</td>
+            // Label
+            document.getElementById('labelPeriode').innerText = `BULAN ${document.getElementById('filterBulan').value} / ${document.getElementById('filterTahun').value}`;
+
+            // Table
+            const tbody = document.getElementById('rankingTableBody');
+            tbody.innerHTML = data.length ? '' : '<tr><td colspan="5" class="p-12 text-center text-slate-400 italic">Data belum tersedia untuk periode ini</td></tr>';
+            
+            data.forEach((item, idx) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-4 font-black text-slate-300">#${idx + 1}</td>
+                        <td class="p-4 font-bold text-slate-700">${item.bank}</td>
+                        <td class="p-4 text-right font-semibold text-slate-600">${item.aset.toLocaleString()}</td>
+                        <td class="p-4 text-right font-bold text-emerald-600">${item.laba.toLocaleString()}</td>
+                        <td class="p-4 text-center"><span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black">${item.casa}%</span></td>
                     </tr>`;
             });
 
@@ -235,24 +273,70 @@
                 type: 'bar',
                 data: {
                     labels: data.map(i => i.bank),
-                    datasets: [{ label: metric.toUpperCase(), data: data.map(i => i[metric]), backgroundColor: '#1e3a8a' }]
+                    datasets: [{
+                        label: activeMetric.toUpperCase(),
+                        data: data.map(i => i[activeMetric]),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 8
+                    }]
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
         function changeMetric(m) {
-            metric = m;
-            document.getElementById('btnAset').classList.toggle('text-blue-600', m==='aset');
-            document.getElementById('btnLaba').classList.toggle('text-blue-600', m==='laba');
-            fetchData();
+            activeMetric = m;
+            ['btnAset', 'btnLaba', 'btnKredit'].forEach(id => {
+                document.getElementById(id).classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+                document.getElementById(id).classList.add('text-slate-500');
+            });
+            const activeId = 'btn' + m.charAt(0).toUpperCase() + m.slice(1);
+            document.getElementById(activeId).classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+            fetchFromCloud();
         }
 
-        // Fitur Export/Template tetap sama
         function downloadTemplate() {
-            const ws = XLSX.utils.aoa_to_sheet([["Nama Bank","Tahun","Bulan","Aset","Laba","Giro","Tabungan","Deposito"]]);
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-            XLSX.writeFile(wb, "Template_BPD.xlsx");
+            const headers = [["Nama Bank", "Tahun", "Bulan", "Aset", "Kredit", "Giro", "Tabungan", "Deposito", "Laba"]];
+            const ws = XLSX.utils.aoa_to_sheet(headers);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Template");
+            XLSX.writeFile(wb, "Template_BPD_Cloud.xlsx");
+        }
+
+        async function importExcel(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const dataRaw = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(dataRaw, {type: 'array'});
+                const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+
+                document.getElementById('loading').style.display = 'flex';
+                for(let row of rows) {
+                    const id = `${row["Nama Bank"]}-${row["Bulan"]}-${row["Tahun"]}`.replace(/\s/g, '_');
+                    const dpk = (row["Giro"]||0) + (row["Tabungan"]||0) + (row["Deposito"]||0);
+                    const item = {
+                        bank: row["Nama Bank"], tahun: row["Tahun"], bulan: row["Bulan"],
+                        aset: row["Aset"]||0, kredit: row["Kredit"]||0, laba: row["Laba"]||0,
+                        dpk: dpk, casa: dpk > 0 ? (((row["Giro"]||0) + (row["Tabungan"]||0))/dpk*100).toFixed(2) : 0
+                    };
+                    await fetch(`${FIREBASE_URL}/data/${id}.json`, { method: 'PUT', body: JSON.stringify(item) });
+                }
+                document.getElementById('loading').style.display = 'none';
+                alert("Import Berhasil disinkronkan ke Cloud!");
+                fetchFromCloud();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function exportExcel() {
+            const res = await fetch(`${FIREBASE_URL}/data.json`);
+            const data = await res.json();
+            if(!data) return alert("Database Kosong.");
+            const ws = XLSX.utils.json_to_sheet(Object.values(data));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Database_BPD");
+            XLSX.writeFile(wb, "Master_Data_Cloud_BPD.xlsx");
         }
     </script>
 </body>
