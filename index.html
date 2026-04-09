@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPD Online Database System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
+        .input-group label { display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+        .glass-card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; }
+        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; items-center: center; color: white; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="loading" class="loading-overlay">Menyambungkan ke Server...</div>
+
+    <header class="bg-blue-900 text-white p-6 rounded-2xl shadow-xl mb-8 flex flex-col lg:flex-row justify-between items-center gap-6">
+        <div>
+            <h1 class="text-2xl font-bold italic text-white">BPD<span class="text-blue-400">Cloud</span> Analytics</h1>
+            <p class="text-xs opacity-70 italic font-bold text-red-400">● LIVE DATABASE CONNECTED</p>
+        </div>
+        <div class="flex flex-wrap gap-2 no-print">
+            <button onclick="downloadTemplate()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-[10px] font-bold">TEMPLATE</button>
+            <label class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg text-[10px] font-bold cursor-pointer">
+                IMPORT EXCEL <input type="file" id="importFile" class="hidden" accept=".xlsx, .xls" onchange="importExcel(event)">
+            </label>
+            <button onclick="exportExcel()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-[10px] font-bold">EXPORT ALL</button>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <div class="lg:col-span-4 no-print">
+            <div class="glass-card p-6 shadow-sm sticky top-6">
+                <h2 class="text-lg font-bold mb-4 border-b pb-2">Input Data</h2>
+                <form id="bankForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="col-span-2 input-group">
+                            <label>Nama Bank BPD</label>
+                            <select id="bankName" class="w-full p-2 border rounded-lg bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">-- Pilih Bank --</option>
+                                <option>BPD BJB</option><option>BPD JATIM</option><option>BPD JATENG</option><option>BPD DKI</option>
+                                <option>BPD KALTIMTARA</option><option>BPD SUMUT</option><option>BPD PAPUA</option>
+                                <option>BPD SUMSELBABEL</option><option>BPD BALI</option><option>BPD NAGARI</option>
+                                <option>BPD SULSELBAR</option><option>BPD RIAUKEPRI</option><option>BPD ACEH</option>
+                                <option>BPD KALSEL</option><option>BPD KALBAR</option><option>BPD SULUTGO</option>
+                                <option>BPD DIY</option><option>BPD NTT</option><option>BPD KALTENG</option>
+                                <option>BPD NTB SYARIAH</option><option>BPD SULTRA</option><option>BPD JAMBI</option>
+                                <option>BPD SULTENG</option><option>BPD LAMPUNG</option><option>BPD MALUKU</option>
+                                <option>BPD BENGKULU</option><option>BPD BANTEN</option>
+                            </select>
+                        </div>
+                        <div class="input-group"><label>Tahun</label><input type="number" id="tahun" class="w-full p-2 border rounded-lg"></div>
+                        <div class="input-group">
+                            <label>Bulan</label>
+                            <select id="bulan" onchange="toggleRasio()" class="w-full p-2 border rounded-lg">
+                                <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+                                <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+                                <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+                                <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-bold text-blue-600 border-b pb-1 uppercase tracking-tighter">Pos Keuangan (Jutaan Rp)</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="input-group"><label>Aset</label><input type="number" id="aset" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>Laba</label><input type="number" id="laba" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>Giro</label><input type="number" id="giro" oninput="calc()" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>Tabungan</label><input type="number" id="tabungan" oninput="calc()" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>Deposito</label><input type="number" id="deposito" oninput="calc()" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>DPK (Auto)</label><input type="number" id="dpk" class="w-full p-2 border rounded-lg text-sm bg-gray-100 font-bold" readonly></div>
+                        </div>
+                    </div>
+
+                    <div id="rasioSection" class="hidden bg-orange-50 p-3 rounded-lg border border-orange-100 space-y-3">
+                        <h3 class="text-xs font-bold text-orange-600 uppercase">Rasio (%)</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="input-group"><label>ROA</label><input type="number" id="roa" class="w-full p-2 border rounded-lg text-sm"></div>
+                            <div class="input-group"><label>CASA (%)</label><input type="number" id="casa" class="w-full p-2 border rounded-lg text-sm bg-white font-bold" readonly></div>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="pushToCloud()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">SIMPAN KE CLOUD</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 space-y-6">
+            <div class="glass-card p-4 flex items-center justify-between">
+                <div class="flex gap-4 items-center">
+                    <select id="filterBulan" onchange="fetchData()" class="p-2 border rounded-lg font-bold text-sm">
+                        <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+                        <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+                        <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+                        <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+                    </select>
+                    <input type="number" id="filterTahun" oninput="fetchData()" class="w-24 p-2 border rounded-lg font-bold text-sm">
+                </div>
+                <div class="flex bg-gray-100 p-1 rounded-lg">
+                    <button onclick="changeMetric('aset')" id="btnAset" class="px-4 py-1.5 rounded-md text-xs font-bold bg-white text-blue-600 shadow-sm">ASET</button>
+                    <button onclick="changeMetric('laba')" id="btnLaba" class="px-4 py-1.5 rounded-md text-xs font-bold text-gray-500">LABA</button>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 h-[350px]">
+                <canvas id="mainChart"></canvas>
+            </div>
+
+            <div class="glass-card overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="p-4 text-xs font-bold">Rank</th>
+                            <th class="p-4 text-xs font-bold">Bank</th>
+                            <th class="p-4 text-right text-xs font-bold">Aset (Juta)</th>
+                            <th class="p-4 text-right text-xs font-bold">Laba (Juta)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PENTING: GANTI DENGAN URL FIREBASE ANDA
+        const FIREBASE_URL = "https://monitoring-bpd-default-rtdb.asia-southeast1.firebasedatabase.app"; 
+
+        let chart;
+        let metric = 'aset';
+
+        window.onload = () => {
+            const y = new Date().getFullYear();
+            document.getElementById('tahun').value = y;
+            document.getElementById('filterTahun').value = y;
+            document.getElementById('filterBulan').value = new Date().getMonth() + 1;
+            fetchData();
+        };
+
+        function calc() {
+            const g = parseFloat(document.getElementById('giro').value) || 0;
+            const t = parseFloat(document.getElementById('tabungan').value) || 0;
+            const d = parseFloat(document.getElementById('deposito').value) || 0;
+            const total = g + t + d;
+            document.getElementById('dpk').value = total;
+            document.getElementById('casa').value = total > 0 ? (((g + t) / total) * 100).toFixed(2) : 0;
+        }
+
+        function toggleRasio() {
+            const b = parseInt(document.getElementById('bulan').value);
+            document.getElementById('rasioSection').classList.toggle('hidden', ![3, 6, 9, 12].includes(b));
+        }
+
+        // SIMPAN DATA KE FIREBASE
+        async function pushToCloud() {
+            const bank = document.getElementById('bankName').value;
+            const bln = document.getElementById('bulan').value;
+            const thn = document.getElementById('tahun').value;
+            if(!bank) return alert("Pilih Bank!");
+
+            const data = {
+                bank, 
+                bulan: parseInt(bln), 
+                tahun: parseInt(thn),
+                aset: parseFloat(document.getElementById('aset').value) || 0,
+                laba: parseFloat(document.getElementById('laba').value) || 0,
+                dpk: parseFloat(document.getElementById('dpk').value) || 0,
+                casa: parseFloat(document.getElementById('casa').value) || 0
+            };
+
+            // ID unik berdasarkan Bank-Bulan-Tahun
+            const id = `${bank}-${bln}-${thn}`.replace(/\s/g, '_');
+            
+            document.getElementById('loading').style.display = 'flex';
+            try {
+                await fetch(`${FIREBASE_URL}/data/${id}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+                alert("Berhasil disimpan ke Server Cloud!");
+                fetchData();
+            } catch (e) {
+                alert("Gagal menyimpan. Periksa URL Firebase Anda.");
+            }
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // AMBIL DATA DARI FIREBASE
+        async function fetchData() {
+            const b = parseInt(document.getElementById('filterBulan').value);
+            const t = parseInt(document.getElementById('filterTahun').value);
+
+            try {
+                const res = await fetch(`${FIREBASE_URL}/data.json`);
+                const allData = await res.json();
+                
+                let list = [];
+                if(allData) {
+                    list = Object.values(allData).filter(i => i.bulan === b && i.tahun === t);
+                }
+                renderUI(list);
+            } catch (e) {
+                console.log("Error fetching data");
+            }
+        }
+
+        function renderUI(data) {
+            data.sort((a, b) => b[metric] - a[metric]);
+            
+            // Tabel
+            const body = document.getElementById('tableBody');
+            body.innerHTML = data.length ? '' : '<tr><td colspan="4" class="p-10 text-center">No Data</td></tr>';
+            data.forEach((item, i) => {
+                body.innerHTML += `
+                    <tr>
+                        <td class="p-4 font-bold text-gray-400">#${i+1}</td>
+                        <td class="p-4 font-bold">${item.bank}</td>
+                        <td class="p-4 text-right">${item.aset.toLocaleString()}</td>
+                        <td class="p-4 text-right text-emerald-600 font-bold">${item.laba.toLocaleString()}</td>
+                    </tr>`;
+            });
+
+            // Chart
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(i => i.bank),
+                    datasets: [{ label: metric.toUpperCase(), data: data.map(i => i[metric]), backgroundColor: '#1e3a8a' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function changeMetric(m) {
+            metric = m;
+            document.getElementById('btnAset').classList.toggle('text-blue-600', m==='aset');
+            document.getElementById('btnLaba').classList.toggle('text-blue-600', m==='laba');
+            fetchData();
+        }
+
+        // Fitur Export/Template tetap sama
+        function downloadTemplate() {
+            const ws = XLSX.utils.aoa_to_sheet([["Nama Bank","Tahun","Bulan","Aset","Laba","Giro","Tabungan","Deposito"]]);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            XLSX.writeFile(wb, "Template_BPD.xlsx");
+        }
+    </script>
+</body>
+</html>
