@@ -3,366 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPD Analytica Enterprise v3.0</title>
+    <title>BPD Analytica Master v3.3.5</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        .input-group label { display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
-        .glass-card { background: white; border: 1px solid #e2e8f0; border-radius: 1.25rem; }
-        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); z-index: 999; justify-content: center; align-items: center; color: white; flex-direction: column; }
-        #loginPage { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
-        .table-container { overflow-x: auto; max-height: 700px; }
-        th { white-space: nowrap; font-size: 10px; cursor: pointer; position: sticky; top: 0; z-index: 10; background: #f8fafc; }
-        td { white-space: nowrap; border-bottom: 1px solid #f1f5f9; }
-        .modal { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; padding: 20px; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); border: 1px solid #e2e8f0; border-radius: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); z-index: 999; justify-content: center; align-items: center; color: white; flex-direction: column; }
+        .table-container { overflow-x: auto; max-height: 500px; border-radius: 1rem; }
+        th { white-space: nowrap; font-size: 10px; cursor: pointer; position: sticky; top: 0; z-index: 10; background: #f8fafc; border-bottom: 2px solid #e2e8f0; padding: 12px 10px; text-transform: uppercase; }
+        td { white-space: nowrap; border-bottom: 1px solid #f1f5f9; padding: 12px 10px; font-size: 11px; font-weight: 600; }
+        .modal { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px); }
+        .input-group label { display: block; font-size: 0.7rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 5px; }
+        .p2p-label { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; }
+        .p2p-value { font-size: 16px; font-weight: 800; color: #0f172a; }
     </style>
 </head>
 <body class="p-0">
 
     <div id="loading" class="loading-overlay">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
-        <p class="font-bold tracking-widest uppercase text-xs">Sinkronisasi Cloud...</p>
+        <p class="font-bold tracking-widest uppercase text-xs">Finalizing Master Sync...</p>
     </div>
 
-    <div id="viewModal" class="modal" onclick="this.style.display='none'">
-        <div class="bg-white w-full max-w-4xl rounded-3xl p-8 shadow-2xl relative overflow-y-auto max-h-[90vh]" onclick="event.stopPropagation()">
-            <button onclick="document.getElementById('viewModal').style.display='none'" class="absolute top-6 right-6 text-gray-400 hover:text-red-500 font-bold text-xl">✕</button>
-            <h2 class="text-2xl font-bold text-slate-800 mb-6 border-b pb-2 italic text-center">Detail Lengkap Data Bank</h2>
-            <div id="modalContent" class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs"></div>
-        </div>
-    </div>
-
-    <div id="loginPage" class="fixed inset-0 z-[100] flex items-center justify-center p-6 text-center">
-        <div class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl">
-            <h1 class="text-3xl font-extrabold text-slate-900 mb-2 italic">BPD<span class="text-blue-600">Analytica</span></h1>
-            <p class="text-slate-500 text-sm mb-8 font-medium">Enterprise Access 2026</p>
+    <div id="loginPage" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl text-center">
+            <h1 class="text-4xl font-extrabold text-slate-900 mb-2 italic tracking-tighter">BPD<span class="text-blue-600">Analytica</span></h1>
+            <p class="text-slate-400 text-xs font-bold uppercase tracking-[0.3em] mb-10">Master Enterprise v3.3.5</p>
             <div class="space-y-4">
-                <button onclick="loginAs('Manajemen')" class="w-full group p-5 border-2 border-slate-100 rounded-2xl flex items-center gap-4 hover:border-blue-500 hover:bg-blue-50 transition-all text-left shadow-sm">
-                    <div class="bg-slate-100 group-hover:bg-blue-600 p-3 rounded-xl transition-colors text-slate-600 group-hover:text-white text-xl">📊</div>
-                    <div><div class="font-bold text-slate-800">Manajemen</div><div class="text-xs text-slate-400">Monitoring & View Only</div></div>
+                <button onclick="loginAs('Manajemen')" class="w-full group p-6 border-2 border-slate-100 rounded-2xl flex items-center gap-5 hover:border-blue-500 hover:bg-blue-50 transition-all text-left shadow-sm">
+                    <div class="bg-slate-100 group-hover:bg-blue-600 p-4 rounded-xl text-2xl">📊</div>
+                    <div><div class="font-bold text-slate-800 text-lg">Manajemen</div><div class="text-xs text-slate-400">View Data & Dashboards</div></div>
                 </button>
-                <button onclick="loginAs('Divisi OKA')" class="w-full group p-5 border-2 border-slate-100 rounded-2xl flex items-center gap-4 hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left shadow-sm">
-                    <div class="bg-slate-100 group-hover:bg-emerald-600 p-3 rounded-xl transition-colors text-slate-600 group-hover:text-white text-xl">📝</div>
-                    <div><div class="font-bold text-slate-800">Divisi OKA</div><div class="text-xs text-slate-400">Master Control & Data Entry</div></div>
+                <button onclick="loginAs('Divisi OKA')" class="w-full group p-6 border-2 border-slate-100 rounded-2xl flex items-center gap-5 hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left shadow-sm">
+                    <div class="bg-slate-100 group-hover:bg-emerald-600 p-4 rounded-xl text-2xl">📝</div>
+                    <div><div class="font-bold text-slate-800 text-lg">Divisi OKA</div><div class="text-xs text-slate-400">Master Data Entry</div></div>
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="mainContent" class="hidden p-4 md:p-8">
-        <header class="bg-slate-900 text-white p-6 rounded-3xl shadow-2xl mb-8 flex flex-col lg:flex-row justify-between items-center gap-6 no-print">
-            <div class="text-center lg:text-left">
-                <h1 class="text-3xl font-extrabold italic">BPD<span class="text-blue-400">Analytica</span></h1>
-                <p id="roleInfo" class="text-slate-400 text-[10px] mt-1 uppercase tracking-widest font-bold"></p>
+    <div id="mainContent" class="hidden p-4 md:p-8 max-w-[1600px] mx-auto">
+        <header class="bg-white p-6 rounded-[2rem] shadow-sm mb-8 flex flex-col lg:flex-row justify-between items-center gap-6 border border-slate-200">
+            <div>
+                <h1 class="text-3xl font-extrabold italic tracking-tighter text-slate-900">BPD<span class="text-blue-600">Analytica</span></h1>
+                <p id="roleInfo" class="text-slate-400 text-[10px] mt-1 uppercase tracking-widest font-black"></p>
             </div>
             <div class="flex flex-wrap justify-center gap-3">
                 <div id="okaActions" class="hidden flex gap-2">
-                    <button onclick="downloadTemplate()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-xs font-bold transition uppercase">Template</button>
-                    <label class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition uppercase">
-                        Import <input type="file" id="importFile" class="hidden" accept=".xlsx, .xls" onchange="importExcel(event)">
-                    </label>
+                    <button onclick="downloadTemplate()" class="bg-slate-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition uppercase">Download Template</button>
+                    <label class="bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition uppercase">Import Excel <input type="file" id="importFile" class="hidden" onchange="importExcel(event)"></label>
                 </div>
-                <button onclick="exportExcel()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl text-xs font-bold transition uppercase">Export Master</button>
-                <button onclick="window.print()" class="bg-white text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition uppercase">PDF</button>
-                <button onclick="location.reload()" class="bg-red-500 px-4 py-2 rounded-xl text-xs font-bold transition uppercase">Logout</button>
+                <button onclick="exportModernExcel()" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition uppercase shadow-md">Export Excel</button>
+                <button onclick="location.reload()" class="bg-red-50 text-red-600 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-red-100 transition uppercase">Logout</button>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div id="okaSidebar" class="lg:col-span-4 no-print hidden">
-                <div class="glass-card p-6 shadow-sm sticky top-6 max-h-[90vh] overflow-y-auto">
-                    <h2 class="text-lg font-bold mb-6 text-slate-800 border-b-2 border-blue-100 pb-2 italic text-center">Entry Data Cloud</h2>
-                    <form id="bankForm" class="space-y-6">
-                        <div class="grid grid-cols-2 gap-4 border-b pb-4">
-                            <div class="col-span-2 input-group">
-                                <label>Pilih Bank BPD</label>
-                                <select id="bankName" class="w-full p-2.5 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500"></select>
-                            </div>
-                            <div class="input-group"><label>Tahun</label><input type="number" id="tahun" class="w-full p-2.5 border rounded-xl"></div>
-                            <div class="input-group"><label>Bulan</label>
-                                <select id="bulan" onchange="toggleForm()" class="w-full p-2.5 border rounded-xl">
-                                    <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
-                                    <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
-                                    <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
-                                    <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
-                                </select>
-                            </div>
+                <div class="glass-card p-8 sticky top-8 max-h-[90vh] overflow-y-auto">
+                    <h2 class="text-xl font-extrabold mb-8 text-slate-800 border-b-2 border-blue-500 pb-2 italic text-center uppercase tracking-tighter">Entry Data Bank</h2>
+                    <form id="bankForm" class="space-y-8">
+                        <div class="grid grid-cols-2 gap-4 border-b pb-6">
+                            <div class="col-span-2 input-group"><label>Bank BPD</label><select id="bankSelection" class="w-full p-3 rounded-xl bg-slate-50 font-bold text-sm outline-none border-none"></select></div>
+                            <div class="input-group"><label>Tahun</label><input type="number" id="tahun" class="w-full p-3 rounded-xl bg-slate-50 font-bold text-sm outline-none border-none"></div>
+                            <div class="input-group"><label>Bulan</label><select id="bulan" onchange="toggleForm()" class="w-full p-3 rounded-xl bg-slate-50 font-bold text-sm outline-none border-none"><option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option><option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option><option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option></select></div>
                         </div>
-
                         <div class="space-y-4">
-                            <h3 class="text-[10px] font-black text-blue-600 uppercase tracking-widest border-b pb-1">Pos Keuangan (Jutaan Rp)</h3>
+                            <h3 class="text-[10px] font-black text-blue-600 uppercase border-l-4 border-blue-600 pl-2">Pos Keuangan (Juta Rp)</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="input-group"><label>Aset</label><input type="text" id="aset" oninput="formatRupiah(this); calcLogic()" class="w-full p-3 border rounded-xl text-sm font-bold"></div>
+                                <div class="input-group"><label>Kredit</label><input type="text" id="kredit" oninput="formatRupiah(this); calcLogic()" class="w-full p-3 border rounded-xl text-sm font-bold"></div>
+                                <div class="input-group"><label>Giro</label><input type="text" id="giro" oninput="formatRupiah(this); calcLogic()" class="w-full p-3 border rounded-xl text-sm font-bold"></div>
+                                <div class="input-group"><label>Tabungan</label><input type="text" id="tabungan" oninput="formatRupiah(this); calcLogic()" class="w-full p-3 border rounded-xl text-sm font-bold"></div>
+                                <div class="input-group"><label>Deposito</label><input type="text" id="deposito" oninput="formatRupiah(this); calcLogic()" class="w-full p-3 border rounded-xl text-sm font-bold"></div>
+                                <div class="input-group"><label>Laba Bersih</label><input type="text" id="laba" oninput="formatRupiah(this)" class="w-full p-3 border rounded-xl text-sm font-bold"></div>
+                                <div class="input-group"><label>CKPN Total</label><input type="text" id="ckpn" oninput="formatRupiah(this)" class="w-full p-3 border rounded-xl text-sm font-bold"></div>
+                                <div class="input-group"><label>Total DPK (Auto)</label><input type="text" id="dpk" class="w-full p-3 border rounded-xl text-sm bg-slate-100 font-black text-blue-700" readonly></div>
+                                <div id="modalIntiWrapper" class="hidden input-group col-span-2"><label>Modal Inti</label><input type="text" id="modalInti" oninput="formatRupiah(this)" class="w-full p-3 border-2 border-blue-200 rounded-xl text-sm bg-blue-50 font-black"></div>
+                            </div>
+                        </div>
+                        <div id="rasioSection" class="hidden space-y-4 bg-orange-50/50 p-5 rounded-2xl border border-orange-100">
+                            <h3 class="text-[10px] font-black text-orange-600 uppercase border-l-4 border-orange-600 pl-2">Rasio Keuangan (%)</h3>
                             <div class="grid grid-cols-2 gap-3">
-                                <div class="input-group"><label>Aset</label><input type="text" id="aset" oninput="formatRupiah(this); calcLogic()" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>Kredit</label><input type="text" id="kredit" oninput="formatRupiah(this); calcLogic()" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>Giro</label><input type="text" id="giro" oninput="formatRupiah(this); calcLogic()" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>Tabungan</label><input type="text" id="tabungan" oninput="formatRupiah(this); calcLogic()" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>Deposito</label><input type="text" id="deposito" oninput="formatRupiah(this); calcLogic()" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>Total DPK (Auto)</label><input type="text" id="dpk" class="w-full p-2 border rounded-lg text-sm bg-slate-50 font-bold" readonly></div>
-                                <div class="input-group"><label>Laba</label><input type="text" id="laba" oninput="formatRupiah(this)" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>CKPN</label><input type="text" id="ckpn" oninput="formatRupiah(this)" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div id="modalIntiWrapper" class="hidden input-group"><label>Modal Inti</label><input type="text" id="modalInti" oninput="formatRupiah(this)" class="w-full p-2 border-2 border-blue-200 rounded-lg text-sm bg-blue-50"></div>
+                                <input type="number" step="0.01" id="roa" placeholder="ROA" class="p-3 rounded-xl font-bold text-sm"><input type="number" step="0.01" id="roe" placeholder="ROE" class="p-3 rounded-xl font-bold text-sm"><input type="number" step="0.01" id="nim" placeholder="NIM" class="p-3 rounded-xl font-bold text-sm"><input type="number" step="0.01" id="nplg" placeholder="NPL GROSS" class="p-3 rounded-xl font-bold text-sm"><input type="number" step="0.01" id="npln" placeholder="NPL NET" class="p-3 rounded-xl font-bold text-sm"><input type="number" step="0.01" id="bopo" placeholder="BOPO" class="p-3 rounded-xl font-bold text-sm"><input type="number" step="0.01" id="ldr" placeholder="LDR" class="p-3 rounded-xl font-bold text-sm"><input type="number" step="0.01" id="kpmm" placeholder="KPMM" class="p-3 rounded-xl font-bold text-sm">
                             </div>
                         </div>
-
-                        <div id="rasioSection" class="hidden space-y-4 bg-orange-50/50 p-4 rounded-2xl border border-orange-100">
-                            <h3 class="text-[10px] font-black text-orange-600 uppercase tracking-widest border-b pb-1">Rasio & Data Tambahan (%)</h3>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div class="input-group"><label>KPMM (%)</label><input type="number" step="0.01" id="kpmm" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>ROA (%)</label><input type="number" step="0.01" id="roa" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>ROE (%)</label><input type="number" step="0.01" id="roe" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>NPL G (%)</label><input type="number" step="0.01" id="nplg" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>NPL N (%)</label><input type="number" step="0.01" id="npln" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>BOPO (%)</label><input type="number" step="0.01" id="bopo" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>NIM (%)</label><input type="number" step="0.01" id="nim" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="input-group"><label>LDR (%)</label><input type="number" step="0.01" id="ldr" class="w-full p-2 border rounded-lg text-sm"></div>
-                                <div class="col-span-2 input-group"><label>CASA (Auto %)</label><input type="number" id="casa" class="w-full p-2 border rounded-lg text-sm bg-white font-bold" readonly></div>
-                                
-                                <div class="col-span-2 border-t pt-4 mt-2 border-orange-200">
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div class="input-group"><label>Kredit UMKM</label><input type="text" id="umkm" oninput="formatRupiah(this); calcLogic()" class="w-full p-2 border rounded-lg text-xs"></div>
-                                        <div class="input-group"><label>Kredit Non UMKM</label><input type="text" id="nonUmkm" oninput="formatRupiah(this); calcLogic()" class="w-full p-2 border rounded-lg text-xs"></div>
-                                        <div class="input-group"><label>CKPN Kredit</label><input type="text" id="ckpnKredit" oninput="formatRupiah(this); calcLogic()" class="w-full p-2 border rounded-lg text-xs"></div>
-                                        <div class="input-group"><label>Nominal NPL</label><input type="text" id="nomNpl" oninput="formatRupiah(this); calcLogic()" class="w-full p-2 border rounded-lg text-xs"></div>
-                                    </div>
-                                    <div class="grid grid-cols-3 gap-1 mt-3 text-center">
-                                        <div class="p-1 bg-white rounded border"><div class="text-[6px] text-gray-400">UMKM %</div><div id="p_umkm" class="text-[10px] font-bold">0%</div></div>
-                                        <div class="p-1 bg-white rounded border"><div class="text-[6px] text-gray-400">NON %</div><div id="p_non" class="text-[10px] font-bold">0%</div></div>
-                                        <div class="p-1 bg-blue-50 rounded border border-blue-100"><div class="text-[6px] text-blue-500">COV %</div><div id="p_cov" class="text-[10px] font-bold text-blue-600">0%</div></div>
-                                    </div>
-                                </div>
+                        <div id="tambahanSection" class="hidden space-y-4 bg-emerald-50/30 p-5 rounded-2xl border border-emerald-100">
+                            <h3 class="text-[10px] font-black text-emerald-600 uppercase border-l-4 border-emerald-600 pl-2">Informasi Tambahan</h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="text" id="umkm" placeholder="Total Krd UMKM" oninput="formatRupiah(this); calcLogic()" class="p-3 rounded-xl text-xs font-bold"><input type="text" id="nonUmkm" placeholder="Total Krd Non UMKM" oninput="formatRupiah(this); calcLogic()" class="p-3 rounded-xl text-xs font-bold"><input type="text" id="ckpnKredit" placeholder="CKPN Kredit" oninput="formatRupiah(this); calcLogic()" class="p-3 rounded-xl text-xs font-bold"><input type="text" id="nomNpl" placeholder="Nominal NPL" oninput="formatRupiah(this); calcLogic()" class="p-3 rounded-xl text-xs font-bold">
                             </div>
                         </div>
-                        <button type="button" onclick="pushToCloud()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-xl hover:bg-blue-600 transition uppercase tracking-widest">Simpan Data</button>
+                        <button type="button" onclick="pushToCloud()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black shadow-xl hover:bg-blue-600 transition uppercase tracking-widest text-xs">Update Database Cloud</button>
                     </form>
                 </div>
             </div>
 
             <div id="dashboardArea" class="lg:col-span-12 space-y-8">
-                <div class="glass-card p-6 flex flex-wrap items-center justify-between gap-4 no-print">
-                    <div class="flex gap-4">
-                        <select id="filterBulan" onchange="fetchFromCloud()" class="p-2 border rounded-xl text-sm font-bold bg-white outline-none">
-                            <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
-                            <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
-                            <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
-                            <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
-                        </select>
-                        <input type="number" id="filterTahun" oninput="fetchFromCloud()" class="w-24 p-2 border rounded-xl text-sm font-bold text-center bg-white">
+                <div class="glass-card p-6 flex flex-wrap items-center justify-between gap-6 shadow-sm">
+                    <div class="flex gap-3">
+                        <select id="filterBulan" onchange="fetchFromCloud()" class="px-5 py-3 rounded-2xl text-sm font-bold bg-white outline-none shadow-sm"></select>
+                        <input type="number" id="filterTahun" oninput="fetchFromCloud()" class="w-28 px-5 py-3 rounded-2xl text-sm font-bold text-center bg-white outline-none">
                     </div>
-                    <div class="min-w-[250px]">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Visualisasi Grafik (Lengkap):</label>
-                        <select id="metricSelector" onchange="changeMetric(this.value)" class="w-full p-2 border-2 border-blue-100 rounded-xl text-sm font-bold text-blue-600 bg-white">
-                            <optgroup label="POS KEUANGAN">
-                                <option value="aset">Aset</option><option value="kredit">Kredit</option><option value="dpk">Total DPK</option>
-                                <option value="laba">Laba</option><option value="modalInti">Modal Inti</option><option value="giro">Giro</option>
-                                <option value="tabungan">Tabungan</option><option value="deposito">Deposito</option><option value="ckpn">CKPN</option>
-                            </optgroup>
-                            <optgroup label="RASIO KEUANGAN (%)">
-                                <option value="kpmm">KPMM</option><option value="roa">ROA</option><option value="roe">ROE</option>
-                                <option value="nplg">NPL Gross</option><option value="npln">NPL Net</option><option value="bopo">BOPO</option>
-                                <option value="nim">NIM</option><option value="ldr">LDR</option><option value="casa">CASA</option>
-                                <option value="p_umkm">Porsi Kredit UMKM</option><option value="p_cov">Coverage CKPN NPL</option>
-                            </optgroup>
-                        </select>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="min-w-[280px]"><label class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Pos Grafik:</label><select id="metricSelector" onchange="changeMetric(this.value)" class="w-full px-5 py-3 border-2 border-blue-100 rounded-2xl text-sm font-black text-blue-600 bg-white shadow-sm"></select></div>
+                        <div class="min-w-[150px]"><label class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Limit:</label><select id="limitSelector" onchange="renderUI(currentData)" class="w-full px-5 py-3 border-2 border-slate-100 rounded-2xl text-sm font-black text-slate-600 bg-white shadow-sm"><option value="5">Top 5 Bank</option><option value="10">Top 10 Bank</option><option value="all" selected>Semua BPD</option></select></div>
                     </div>
                 </div>
 
-                <div class="glass-card p-8 no-print">
-                    <h2 class="text-xl font-bold text-slate-800 mb-6 italic tracking-tight">Performa Regional BPD</h2>
+                <div class="glass-card p-8">
+                    <h2 id="chartTitle" class="text-2xl font-black text-slate-800 mb-8 italic tracking-tighter uppercase border-l-8 border-blue-600 pl-4">Ranking Regional</h2>
                     <div class="h-[400px]"><canvas id="mainChart"></canvas></div>
                 </div>
 
-                <div class="glass-card overflow-hidden">
-                    <div class="p-6 border-b bg-slate-50 flex justify-between items-center">
-                        <h2 class="text-xl font-bold text-slate-800 tracking-tighter">Peringkat & Tabel Seluruh Pos</h2>
-                    </div>
+                <div class="glass-card overflow-hidden border-t-8 border-slate-900 shadow-xl">
                     <div class="table-container">
-                        <table id="rankingTable" class="w-full text-left">
-                            <thead class="bg-slate-100 border-b">
-                                <tr class="text-[7px] font-black text-slate-500 uppercase tracking-widest">
-                                    <th class="p-4">No</th>
-                                    <th class="p-4" onclick="sortTable('bank')">Bank ↕</th>
-                                    <th class="p-4 text-right" onclick="sortTable('aset')">Aset ↕</th>
-                                    <th class="p-4 text-right" onclick="sortTable('kredit')">Kredit ↕</th>
-                                    <th class="p-4 text-right text-emerald-600" onclick="sortTable('laba')">Laba ↕</th>
-                                    <th class="p-4 text-center" onclick="sortTable('casa')">CASA %</th>
-                                    <th class="p-4 text-center" onclick="sortTable('nplg')">NPL G %</th>
-                                    <th class="p-4 text-center" onclick="sortTable('p_cov')">COV %</th>
-                                    <th class="p-4 text-center bg-blue-50 no-print">Aksi Control</th>
-                                </tr>
-                            </thead>
-                            <tbody id="rankingTableBody" class="divide-y divide-slate-100 text-[10px] font-bold text-slate-700"></tbody>
+                        <table id="rankingTable" class="w-full text-left text-center">
+                            <thead class="bg-slate-50 border-b"><tr class="font-black text-slate-500 uppercase tracking-widest text-[9px]"><th class="p-4">No</th><th class="p-4 text-left">Bank ↕</th><th class="p-4">Aset</th><th class="p-4">Krd</th><th class="p-4">Laba</th><th class="p-4">NPL G%</th><th class="p-4">CASA%</th><th class="p-4">ROA %</th><th class="p-4">% UMKM</th><th class="p-4 text-blue-600">% COV</th><th class="p-4 bg-blue-50 no-print">Aksi</th></tr></thead>
+                            <tbody id="rankingTableBody" class="font-bold"></tbody>
                         </table>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 no-print pb-10">
+                    <div class="glass-card p-8 border-t-8 border-emerald-500 shadow-xl">
+                        <h3 class="text-xl font-black uppercase text-slate-900 mb-8 tracking-tighter italic border-b pb-4">Peer-to-Peer Comparative</h3>
+                        <div class="grid grid-cols-2 gap-6 mb-8"><select id="h2h1" onchange="runH2H()" class="p-4 border-2 border-slate-100 rounded-2xl text-sm font-black bg-slate-50"></select><select id="h2h2" onchange="runH2H()" class="p-4 border-2 border-slate-100 rounded-2xl text-sm font-black bg-slate-50"></select></div>
+                        <div id="h2hResult" class="space-y-1 max-h-[500px] overflow-y-auto pr-2"></div>
+                    </div>
+                    <div class="glass-card p-8 border-t-8 border-indigo-600 shadow-xl">
+                        <div class="flex flex-wrap justify-between items-center mb-8"><h3 class="text-xl font-black uppercase text-slate-900 tracking-tighter italic border-b pb-4">Dynamic Trend Analysis</h3><div class="flex gap-2"><select id="trendBank" onchange="updateTrendChart()" class="p-2 border rounded-xl text-xs font-bold"></select><select id="trendMetric" onchange="updateTrendChart()" class="p-2 border-2 border-indigo-100 rounded-xl text-xs font-black text-indigo-600"></select></div></div>
+                        <div class="h-[300px]"><canvas id="trendChart"></canvas></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer class="mt-20 p-10 border-t text-center text-slate-400 font-bold text-[10px] uppercase tracking-[0.4em] no-print">
-        Divisi OKA - 2026
-    </footer>
+    <div id="viewModal" class="modal" onclick="this.style.display='none'">
+        <div class="bg-white w-full max-w-6xl rounded-[3rem] p-12 shadow-2xl relative overflow-y-auto max-h-[95vh]" onclick="event.stopPropagation()">
+            <button onclick="document.getElementById('viewModal').style.display='none'" class="absolute top-8 right-10 text-slate-300 hover:text-red-500 font-bold text-4xl">✕</button>
+            <div class="text-center mb-10"><h2 id="modalBankTitle" class="text-4xl font-black text-slate-900 italic uppercase underline decoration-blue-600 decoration-8 underline-offset-8"></h2><p id="modalBankSubtitle" class="text-blue-600 font-black text-sm uppercase tracking-[0.5em] mt-6"></p></div>
+            <div id="modalContent" class="grid grid-cols-1 md:grid-cols-3 gap-10"></div>
+        </div>
+    </div>
 
     <script>
         const FIREBASE_URL = "https://monitoring-bpd-default-rtdb.asia-southeast1.firebasedatabase.app"; 
-        const DAFTAR_BPD = ["BPD BJB", "BPD JATIM", "BPD JATENG", "BPD DKI", "BPD KALTIMTARA", "BPD SUMUT", "BPD PAPUA", "BPD SUMSELBABEL", "BPD BALI", "BPD NAGARI", "BPD SULSELBAR", "BPD RIAUKEPRI", "BPD ACEH", "BPD KALSEL", "BPD KALBAR", "BPD SULUTGO", "BPD DIY", "BPD NTT", "BPD KALTENG", "BPD NTB SYARIAH", "BPD SULTRA", "BPD JAMBI", "BPD SULTENG", "BPD LAMPUNG", "BPD MALUKU", "BPD BENGKULU", "BPD BANTEN"];
+        const DAFTAR_BPD = [{sandi:"110", nama:"BPD BJB"}, {sandi:"114", nama:"BPD JATIM"}, {sandi:"113", nama:"BPD JATENG"}, {sandi:"111", nama:"BPD DKI"}, {sandi:"124", nama:"BPD KALTIMTARA"}, {sandi:"117", nama:"BPD SUMUT"}, {sandi:"132", nama:"BPD PAPUA"}, {sandi:"120", nama:"BPD SUMSELBABEL"}, {sandi:"129", nama:"BPD BALI"}, {sandi:"118", nama:"BPD NAGARI"}, {sandi:"126", nama:"BPD SULSELBAR"}, {sandi:"119", nama:"BPD RIAUKEPRI"}, {sandi:"116", nama:"BPD ACEH"}, {sandi:"122", nama:"BPD KALSEL"}, {sandi:"123", nama:"BPD KALBAR"}, {sandi:"127", nama:"BPD SULUTGO"}, {sandi:"112", nama:"BPD DIY"}, {sandi:"130", nama:"BPD NTT"}, {sandi:"125", nama:"BPD KALTENG"}, {sandi:"128", nama:"BPD NTB SYARIAH"}, {sandi:"135", nama:"BPD SULTRA"}, {sandi:"115", nama:"BPD JAMBI"}, {sandi:"134", nama:"BPD SULTENG"}, {sandi:"121", nama:"BPD LAMPUNG"}, {sandi:"131", nama:"BPD MALUKU"}, {sandi:"133", nama:"BPD BENGKULU"}, {sandi:"137", nama:"BPD BANTEN"}];
 
-        let chart, currentUser = "", currentData = [], activeMetric = 'aset', sortOrder = 1;
+        const METRICS = [
+            {l:"Total Aset", k:"aset", g:"POS KEUANGAN"}, {l:"Total Kredit", k:"kredit", g:"POS KEUANGAN"}, {l:"Giro", k:"giro", g:"POS KEUANGAN"}, {l:"Tabungan", k:"tabungan", g:"POS KEUANGAN"}, {l:"Deposito", k:"deposito", g:"POS KEUANGAN"}, {l:"Total DPK", k:"dpk", g:"POS KEUANGAN"}, {l:"Laba Bersih", k:"laba", g:"POS KEUANGAN"}, {l:"CKPN Total", k:"ckpn", g:"POS KEUANGAN"}, {l:"Modal Inti", k:"modalInti", g:"POS KEUANGAN"},
+            {l:"ROA (%)", k:"roa", g:"RASIO", p:true}, {l:"ROE (%)", k:"roe", g:"RASIO", p:true}, {l:"NIM (%)", k:"nim", g:"RASIO", p:true}, {l:"NPL Gross (%)", k:"nplg", g:"RASIO", p:true}, {l:"NPL Net (%)", k:"npln", g:"RASIO", p:true}, {l:"BOPO (%)", k:"bopo", g:"RASIO", p:true}, {l:"LDR (%)", k:"ldr", g:"RASIO", p:true}, {l:"KPMM (%)", k:"kpmm", g:"RASIO", p:true}, {l:"CASA (%)", k:"casa", g:"RASIO", p:true},
+            {l:"Total Kredit UMKM", k:"umkm", g:"INFO TAMBAHAN"}, {l:"Total Kredit Non UMKM", k:"nonUmkm", g:"INFO TAMBAHAN"}, {l:"CKPN Kredit", k:"ckpnKredit", g:"INFO TAMBAHAN"}, {l:"Nominal NPL", k:"nomNpl", g:"INFO TAMBAHAN"}, {l:"Porsi UMKM (%)", k:"p_umkm", g:"INFO TAMBAHAN", p:true}, {l:"Coverage CKPN NPL (%)", k:"p_cov", g:"INFO TAMBAHAN", p:true}
+        ];
 
-        function formatRupiah(el) {
-            let val = el.value.replace(/[^0-9]/g, '');
-            el.value = val ? parseInt(val).toLocaleString('id-ID') : '';
-        }
+        let chart, trendChart, currentUser = "", currentData = [], allCloudData = {}, activeMetric = 'aset', sortOrder = 1;
+
+        function formatRupiah(el) { let val = el.value.replace(/[^0-9]/g, ''); el.value = val ? parseInt(val).toLocaleString('id-ID') : ''; }
         function unformat(str) { return parseFloat(str.toString().replace(/\./g, '')) || 0; }
         function fR(v) { return (v || 0).toLocaleString('id-ID'); }
 
         window.onload = () => {
-            const select = document.getElementById('bankName');
-            DAFTAR_BPD.forEach(b => select.innerHTML += `<option>${b}</option>`);
-            document.getElementById('tahun').value = 2026;
-            document.getElementById('filterTahun').value = 2026;
-            document.getElementById('filterBulan').value = new Date().getMonth() + 1;
+            const currentYear = 2026;
+            const currentMonth = new Date().getMonth() + 1;
+            
+            ['bankSelection', 'h2h1', 'h2h2', 'trendBank'].forEach(sID => {
+                const el = document.getElementById(sID);
+                DAFTAR_BPD.sort((a,b) => a.sandi.localeCompare(b.sandi)).forEach(b => el.innerHTML += `<option value="${b.sandi}">${b.sandi} - ${b.nama}</option>`);
+            });
+            ['metricSelector', 'trendMetric'].forEach(sID => {
+                const el = document.getElementById(sID);
+                let currentGroup = "";
+                METRICS.forEach(m => {
+                    if(m.g !== currentGroup) {
+                        if(currentGroup !== "") el.innerHTML += `</optgroup>`;
+                        el.innerHTML += `<optgroup label="${m.g}">`;
+                        currentGroup = m.g;
+                    }
+                    el.innerHTML += `<option value="${m.k}">${m.l}</option>`;
+                });
+            });
+
+            document.getElementById('tahun').value = currentYear;
+            document.getElementById('filterTahun').value = currentYear;
+            const mSel = document.getElementById('filterBulan');
+            ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"].forEach((m, i) => {
+                const opt = document.createElement('option'); opt.value = i + 1; opt.text = m;
+                if(i + 1 === currentMonth) opt.selected = true;
+                mSel.appendChild(opt);
+            });
         };
 
         function loginAs(role) {
-            currentUser = role;
-            document.getElementById('loginPage').classList.add('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
-            document.getElementById('roleInfo').innerText = `Otoritas: ${role} | 2026`;
-            if(role === 'Divisi OKA') {
-                document.getElementById('okaSidebar').classList.remove('hidden');
-                document.getElementById('okaActions').classList.remove('hidden');
-                document.getElementById('dashboardArea').classList.replace('lg:col-span-12', 'lg:col-span-8');
-            }
+            currentUser = role; document.getElementById('loginPage').classList.add('hidden'); document.getElementById('mainContent').classList.remove('hidden');
+            document.getElementById('roleInfo').innerText = `Otoritas: ${role} | Multi-Year Enterprise`;
+            if(role === 'Divisi OKA') { document.getElementById('okaSidebar').classList.remove('hidden'); document.getElementById('dashboardArea').classList.replace('lg:col-span-12', 'lg:col-span-8'); document.getElementById('okaActions').classList.remove('hidden'); }
             fetchFromCloud();
         }
 
-        function toggleForm() {
+        function toggleForm() { 
             const b = parseInt(document.getElementById('bulan').value);
             const isTri = [3,6,9,12].includes(b);
             document.getElementById('rasioSection').classList.toggle('hidden', !isTri);
+            document.getElementById('tambahanSection').classList.toggle('hidden', !isTri);
             document.getElementById('modalIntiWrapper').classList.toggle('hidden', !isTri);
         }
 
         function calcLogic() {
             const g = unformat(document.getElementById('giro').value), t = unformat(document.getElementById('tabungan').value), d = unformat(document.getElementById('deposito').value);
-            const totalDpk = g + t + d;
-            document.getElementById('dpk').value = fR(totalDpk);
+            const totalDpk = g + t + d; document.getElementById('dpk').value = fR(totalDpk);
             document.getElementById('casa').value = totalDpk > 0 ? (((g+t)/totalDpk)*100).toFixed(2) : 0;
-
-            const k = unformat(document.getElementById('kredit').value), u = unformat(document.getElementById('umkm').value), nu = unformat(document.getElementById('nonUmkm').value);
-            if(k > 0) {
-                document.getElementById('p_umkm').innerText = ((u/k)*100).toFixed(2) + "%";
-                document.getElementById('p_non').innerText = ((nu/k)*100).toFixed(2) + "%";
-            }
-            const cn = unformat(document.getElementById('ckpnKredit').value), nn = unformat(document.getElementById('nomNpl').value);
-            if(cn > 0) document.getElementById('p_cov').innerText = ((nn/cn)*100).toFixed(2) + "%";
+            const ck = unformat(document.getElementById('ckpnKredit').value), nn = unformat(document.getElementById('nomNpl').value);
+            if(nn > 0) document.getElementById('p_cov').innerText = ((ck/nn)*100).toFixed(2) + "%";
         }
 
         async function pushToCloud() {
-            const bank = document.getElementById('bankName').value;
-            if(!bank) return alert("Pilih Bank!");
+            const sandi = document.getElementById('bankSelection').value; const bankObj = DAFTAR_BPD.find(b => b.sandi === sandi);
+            const bln = document.getElementById('bulan').value, thn = document.getElementById('tahun').value, dbID = `${sandi}-${bln}-${thn}`;
             document.getElementById('loading').style.display = 'flex';
-            const data = {
-                bank, bulan: parseInt(document.getElementById('bulan').value), tahun: parseInt(document.getElementById('tahun').value),
-                aset: unformat(document.getElementById('aset').value), kredit: unformat(document.getElementById('kredit').value),
-                giro: unformat(document.getElementById('giro').value), tabungan: unformat(document.getElementById('tabungan').value),
-                deposito: unformat(document.getElementById('deposito').value), dpk: unformat(document.getElementById('dpk').value),
-                laba: unformat(document.getElementById('laba').value), ckpn: unformat(document.getElementById('ckpn').value), modalInti: unformat(document.getElementById('modalInti').value),
-                kpmm: parseFloat(document.getElementById('kpmm').value)||0, roa: parseFloat(document.getElementById('roa').value)||0, roe: parseFloat(document.getElementById('roe').value)||0,
-                nplg: parseFloat(document.getElementById('nplg').value)||0, npln: parseFloat(document.getElementById('npln').value)||0,
-                bopo: parseFloat(document.getElementById('bopo').value)||0, nim: parseFloat(document.getElementById('nim').value)||0,
-                ldr: parseFloat(document.getElementById('ldr').value)||0, casa: parseFloat(document.getElementById('casa').value)||0,
-                umkm: unformat(document.getElementById('umkm').value), nonUmkm: unformat(document.getElementById('nonUmkm').value),
-                ckpnKredit: unformat(document.getElementById('ckpnKredit').value), nomNpl: unformat(document.getElementById('nomNpl').value),
-                p_cov: parseFloat(document.getElementById('p_cov').innerText)||0, p_umkm: parseFloat(document.getElementById('p_umkm').innerText)||0, p_non: parseFloat(document.getElementById('p_non').innerText)||0
+            const k = unformat(document.getElementById('kredit').value), u = unformat(document.getElementById('umkm').value), nu = unformat(document.getElementById('nonUmkm').value), nn = unformat(document.getElementById('nomNpl').value), ck = unformat(document.getElementById('ckpnKredit').value);
+            const data = { 
+                dbKey: dbID, sandi: sandi, bank: bankObj.nama, bulan: parseInt(bln), tahun: parseInt(thn),
+                aset: unformat(document.getElementById('aset').value), kredit: k, giro: unformat(document.getElementById('giro').value), tabungan: unformat(document.getElementById('tabungan').value), deposito: unformat(document.getElementById('deposito').value), dpk: unformat(document.getElementById('dpk').value), laba: unformat(document.getElementById('laba').value), ckpn: unformat(document.getElementById('ckpn').value), modalInti: unformat(document.getElementById('modalInti').value), kpmm: parseFloat(document.getElementById('kpmm').value)||0, roa: parseFloat(document.getElementById('roa').value)||0, roe: parseFloat(document.getElementById('roe').value)||0, nplg: parseFloat(document.getElementById('nplg').value)||0, npln: parseFloat(document.getElementById('npln').value)||0, nim: parseFloat(document.getElementById('nim').value)||0, bopo: parseFloat(document.getElementById('bopo').value)||0, ldr: parseFloat(document.getElementById('ldr').value)||0, casa: parseFloat(document.getElementById('casa').value)||0, umkm: u, nonUmkm: nu, ckpnKredit: ck, nomNpl: nn, p_cov: nn > 0 ? parseFloat(((ck/nn)*100).toFixed(2)) : 0, p_umkm: k > 0 ? parseFloat(((u/k)*100).toFixed(2)) : 0
             };
-            const id = `${bank}-${data.bulan}-${data.tahun}`.replace(/\s/g, '_');
-            try {
-                await fetch(`${FIREBASE_URL}/data/${id}.json`, { method:'PUT', body:JSON.stringify(data) });
-                document.getElementById('bankForm').reset(); fetchFromCloud(); alert("Berhasil!");
-            } catch (e) { alert("Gagal koneksi server!"); }
-            document.getElementById('loading').style.display = 'none';
+            await fetch(`${FIREBASE_URL}/data/${dbID}.json`, { method:'PUT', body:JSON.stringify(data) });
+            document.getElementById('loading').style.display = 'none'; fetchFromCloud(); alert("Sync Success!");
         }
 
         async function fetchFromCloud() {
+            const res = await fetch(`${FIREBASE_URL}/data.json`); allCloudData = await res.json() || {};
             const fb = parseInt(document.getElementById('filterBulan').value), ft = parseInt(document.getElementById('filterTahun').value);
-            try {
-                const res = await fetch(`${FIREBASE_URL}/data.json`);
-                const all = await res.json();
-                currentData = all ? Object.values(all).filter(i => i.bulan === fb && i.tahun === ft) : [];
-                renderUI(currentData);
-            } catch (e) { console.error("Database fetch failed"); }
+            currentData = Object.values(allCloudData).filter(i => i.bulan === fb && i.tahun === ft);
+            renderUI(currentData); updateTrendChart(); runH2H();
         }
 
         function renderUI(data) {
-            data.sort((a,b) => b[activeMetric] - a[activeMetric]);
-            const tbody = document.getElementById('rankingTableBody');
-            tbody.innerHTML = data.length ? '' : '<tr><td colspan="9" class="p-10 text-center text-slate-300 italic uppercase">Database Kosong</td></tr>';
+            data.sort((a,b) => (b[activeMetric] || 0) - (a[activeMetric] || 0));
+            const tbody = document.getElementById('rankingTableBody'); tbody.innerHTML = '';
             data.forEach((item, idx) => {
-                const id = `${item.bank}-${item.bulan}-${item.tahun}`.replace(/\s/g, '_');
-                tbody.innerHTML += `<tr class="hover:bg-blue-50/50 transition"><td class="p-4 text-slate-300 font-black">${idx+1}</td><td class="p-4 text-slate-900 font-bold">${item.bank}</td><td class="p-4 text-right">${fR(item.aset)}</td><td class="p-4 text-right">${fR(item.kredit)}</td><td class="p-4 text-right text-emerald-600 font-bold">${fR(item.laba)}</td><td class="p-4 text-center font-bold text-blue-600">${item.casa}%</td><td class="p-4 text-center text-red-500">${item.nplg||0}%</td><td class="p-4 text-center font-bold text-blue-500">${item.p_cov||0}%</td><td class="p-4 text-center no-print"><div class="flex gap-1 justify-center"><button onclick="viewDetail('${id}')" class="p-1.5 bg-slate-100 rounded hover:bg-slate-200">👁</button>${currentUser === 'Divisi OKA' ? `<button onclick="editData('${id}')" class="p-1.5 bg-blue-100 rounded hover:bg-blue-200 text-blue-600">✎</button><button onclick="deleteData('${id}')" class="p-1.5 bg-red-100 rounded hover:bg-red-200 text-red-600">🗑</button>` : ''}</div></td></tr>`;
+                tbody.innerHTML += `<tr class="hover:bg-slate-50 transition">
+                    <td class="p-4 text-slate-300 font-black">${idx+1}</td>
+                    <td class="p-4 text-slate-900 font-black text-left">${item.bank}</td>
+                    <td class="p-4 text-right">${fR(item.aset)}</td>
+                    <td class="p-4 text-right">${fR(item.kredit)}</td>
+                    <td class="p-4 text-emerald-600 font-black text-right">${fR(item.laba)}</td>
+                    <td class="p-4 text-center ${item.nplg > 5 ? 'text-red-600' : ''}">${item.nplg||0}%</td>
+                    <td class="p-4 text-center text-blue-600">${item.casa||0}%</td>
+                    <td class="p-4 text-center">${item.roa||0}%</td>
+                    <td class="p-4 bg-emerald-50 text-emerald-700">${item.p_umkm||0}%</td>
+                    <td class="p-4 bg-blue-50 text-blue-700 font-black">${item.p_cov||0}%</td>
+                    <td class="p-4 text-center no-print"><div class="flex gap-1 justify-center"><button onclick="actionView('${item.dbKey}')" class="p-1.5 bg-slate-100 rounded-lg hover:bg-slate-200">👁</button>${currentUser === 'Divisi OKA' ? `<button onclick="actionEdit('${item.dbKey}')" class="p-1.5 bg-blue-100 rounded-lg text-blue-600">✎</button><button onclick="actionDelete('${item.dbKey}')" class="p-1.5 bg-red-100 rounded-lg text-red-600">🗑</button>` : ''}</div></td>
+                </tr>`;
             });
-            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f43f5e', '#14b8a6', '#6366f1'];
+            const limit = document.getElementById('limitSelector').value;
+            let chartData = limit === 'all' ? data : data.slice(0, parseInt(limit));
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f43f5e', '#14b8a6', '#6366f1', '#fbbf24', '#2dd4bf'];
             if(chart) chart.destroy();
-            chart = new Chart(document.getElementById('mainChart').getContext('2d'), { type:'bar', data:{ labels: data.map(i=>i.bank), datasets:[{ label: activeMetric.toUpperCase(), data: data.map(i=>i[activeMetric]), backgroundColor: data.map((_, i) => colors[i % colors.length]), borderRadius: 8 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }});
+            chart = new Chart(document.getElementById('mainChart').getContext('2d'), { type: 'bar', data: { labels: chartData.map(i=>i.bank), datasets:[{ label: activeMetric.toUpperCase(), data: chartData.map(i=>i[activeMetric]||0), backgroundColor: chartData.map((_, i) => colors[i % colors.length]), borderRadius: 12 }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }});
         }
 
-        async function viewDetail(id) {
-            const res = await fetch(`${FIREBASE_URL}/data/${id}.json`);
-            const d = await res.json();
-            const modal = document.getElementById('viewModal');
-            const content = document.getElementById('modalContent');
-            content.innerHTML = `<div class="col-span-full bg-slate-100 p-4 rounded-2xl mb-4 flex justify-between items-center"><span class="font-black text-slate-800 text-lg uppercase italic">${d.bank}</span><span class="bg-blue-600 text-white px-4 py-1 rounded-full font-bold uppercase tracking-tighter text-[10px]">Periode ${d.bulan}/${d.tahun}</span></div>
-                <div class="p-4 border rounded-2xl bg-white shadow-sm"><h4 class="font-black text-blue-600 mb-3 border-b uppercase pb-1 tracking-widest text-[9px]">Pos Keuangan</h4><div class="space-y-1.5"><p class="flex justify-between uppercase">Aset: <b>${fR(d.aset)}</b></p><p class="flex justify-between uppercase">Kredit: <b>${fR(d.kredit)}</b></p><p class="flex justify-between uppercase font-bold">Total DPK: <b>${fR(d.dpk)}</b></p><p class="flex justify-between text-emerald-600 font-bold uppercase">Laba: <b>${fR(d.laba)}</b></p><p class="flex justify-between uppercase text-gray-400">CKPN: <b>${fR(d.ckpn)}</b></p><p class="flex justify-between text-blue-600 font-bold uppercase">Modal Inti: <b>${fR(d.modalInti)}</b></p></div></div>
-                <div class="p-4 border rounded-2xl bg-white shadow-sm"><h4 class="font-black text-orange-600 mb-3 border-b uppercase pb-1 tracking-widest text-[9px]">Rasio Operasional</h4><div class="space-y-1.5"><p class="flex justify-between uppercase">Casa: <b>${d.casa}%</b></p><p class="flex justify-between uppercase">Kpmm: <b>${d.kpmm}%</b></p><p class="flex justify-between uppercase">Roa: <b>${d.roa}%</b></p><p class="flex justify-between uppercase">Roe: <b>${d.roe}%</b></p><p class="flex justify-between text-red-500 font-bold uppercase">Npl Gross: <b>${d.nplg}%</b></p><p class="flex justify-between uppercase">Npl Net: <b>${d.npln}%</b></p><p class="flex justify-between uppercase">Bopo: <b>${d.bopo}%</b></p><p class="flex justify-between uppercase">Nim: <b>${d.nim}%</b></p><p class="flex justify-between uppercase">Ldr: <b>${d.ldr}%</b></p></div></div>
-                <div class="p-4 border rounded-2xl bg-slate-50 shadow-sm border-blue-100"><h4 class="font-black text-slate-600 mb-3 border-b uppercase pb-1 tracking-widest text-[9px]">Data Tambahan</h4><div class="space-y-1.5"><p class="flex justify-between">% UMKM: <b class="text-emerald-600 font-bold">${d.p_umkm}%</b></p><p class="flex justify-between">% Non-UMKM: <b>${d.p_non}%</b></p><p class="flex justify-between font-bold text-blue-600">% Coverage: <b>${d.p_cov}%</b></p></div></div>`;
-            modal.style.display = 'flex';
+        function updateTrendChart() {
+            const s = document.getElementById('trendBank').value;
+            const m = document.getElementById('trendMetric').value;
+            const history = Object.values(allCloudData).filter(d => d.sandi === s).sort((a,b) => (a.tahun*100+a.bulan) - (b.tahun*100+b.bulan));
+            if(trendChart) trendChart.destroy();
+            trendChart = new Chart(document.getElementById('trendChart').getContext('2d'), { type: 'line', data: { labels: history.map(d => `${d.bulan}/${d.tahun}`), datasets:[{ label: m.toUpperCase(), data: history.map(d => d[m]), borderColor:'#4f46e5', borderWidth:4, tension:0.4, fill:true, backgroundColor:'rgba(79, 70, 229, 0.05)', pointRadius:6, pointBackgroundColor:'#fff' }] }, options:{ responsive:true, maintainAspectRatio:false }});
         }
 
-        async function editData(id) {
-            document.getElementById('loading').style.display = 'flex';
-            const res = await fetch(`${FIREBASE_URL}/data/${id}.json`);
-            const d = await res.json();
-            document.getElementById('bankName').value = d.bank; document.getElementById('bulan').value = d.bulan; document.getElementById('tahun').value = d.tahun;
-            document.getElementById('aset').value = fR(d.aset); document.getElementById('kredit').value = fR(d.kredit); document.getElementById('giro').value = fR(d.giro); document.getElementById('tabungan').value = fR(d.tabungan); document.getElementById('deposito').value = fR(d.deposito); document.getElementById('laba').value = fR(d.laba); document.getElementById('ckpn').value = fR(d.ckpn); document.getElementById('modalInti').value = fR(d.modalInti);
-            toggleForm(); 
-            if([3,6,9,12].includes(parseInt(d.bulan))) {
-                document.getElementById('kpmm').value = d.kpmm; document.getElementById('roa').value = d.roa; document.getElementById('roe').value = d.roe; document.getElementById('nplg').value = d.nplg; document.getElementById('npln').value = d.npln; document.getElementById('bopo').value = d.bopo; document.getElementById('nim').value = d.nim; document.getElementById('ldr').value = d.ldr; document.getElementById('umkm').value = fR(d.umkm); document.getElementById('nonUmkm').value = fR(d.nonUmkm); document.getElementById('ckpnKredit').value = fR(d.ckpnKredit); document.getElementById('nomNpl').value = fR(d.nomNpl);
-            }
-            calcLogic(); window.scrollTo({ top: 0, behavior: 'smooth' });
-            document.getElementById('loading').style.display = 'none';
+        function runH2H() {
+            const s1 = document.getElementById('h2h1').value, s2 = document.getElementById('h2h2').value;
+            const fb = parseInt(document.getElementById('filterBulan').value), ft = parseInt(document.getElementById('filterTahun').value);
+            const d1 = Object.values(allCloudData).find(d => d.sandi === s1 && d.bulan === fb && d.tahun === ft);
+            const d2 = Object.values(allCloudData).find(d => d.sandi === s2 && d.bulan === fb && d.tahun === ft);
+            const res = document.getElementById('h2hResult');
+            if(!d1 || !d2) return res.innerHTML = `<p class='text-center py-20 text-slate-300 font-bold'>DATA TIDAK LENGKAP</p>`;
+            res.innerHTML = `<div class='grid grid-cols-3 text-[10px] font-black uppercase text-slate-400 mb-6 text-center tracking-widest'><div>${d1.bank}</div><div>KOMPONEN</div><div>${d2.bank}</div></div>`;
+            METRICS.forEach(m => {
+                res.innerHTML += `<div class='grid grid-cols-3 items-center py-4 border-b border-slate-100 text-center hover:bg-slate-50 transition'><div class='p2p-value'>${m.p ? (d1[m.k]||0)+'%' : fR(d1[m.k])}</div><div class='p2p-label'>${m.l}</div><div class='p2p-value'>${m.p ? (d2[m.k]||0)+'%' : fR(d2[m.k])}</div></div>`;
+            });
         }
 
-        async function deleteData(id) { if(confirm("Hapus data selamanya dari Cloud?")) { document.getElementById('loading').style.display = 'flex'; await fetch(`${FIREBASE_URL}/data/${id}.json`, { method:'DELETE' }); document.getElementById('loading').style.display = 'none'; fetchFromCloud(); }}
-        
+        function actionView(key) {
+            const d = currentData.find(x => x.dbKey === key); if(!d) return; const rf = (v) => (v || 0).toLocaleString('id-ID');
+            document.getElementById('modalBankTitle').innerText = d.bank; document.getElementById('modalBankSubtitle').innerText = `ID SANDI: ${d.sandi} | PERIODE: ${d.bulan}/${d.tahun}`;
+            document.getElementById('modalContent').innerHTML = `
+                <div class="p-8 border-2 border-blue-50 rounded-[2.5rem] bg-blue-50/20 shadow-inner"><h4 class="text-xs font-black text-blue-600 uppercase border-b-2 border-blue-100 mb-6 pb-2">Pos Keuangan (Juta)</h4><div class="space-y-3 font-bold text-sm">
+                    <p class="flex justify-between">Aset: <b>${rf(d.aset)}</b></p><p class="flex justify-between">Kredit: <b>${rf(d.kredit)}</b></p><p class="flex justify-between">Giro: <b>${rf(d.giro)}</b></p><p class="flex justify-between">Tabungan: <b>${rf(d.tabungan)}</b></p><p class="flex justify-between">Deposito: <b>${rf(d.deposito)}</b></p><p class="flex justify-between border-t-2 pt-2 text-slate-900 font-black">Total DPK: <b>${rf(d.dpk)}</b></p><p class="flex justify-between text-emerald-600 font-black">Laba Bersih: <b>${rf(d.laba)}</b></p><p class="flex justify-between text-gray-400">CKPN Total: <b>${rf(d.ckpn)}</b></p><p class="flex justify-between text-blue-600 font-black">Modal Inti: <b>${rf(d.modalInti)}</b></p>
+                </div></div>
+                <div class="p-8 border-2 border-orange-50 rounded-[2.5rem] bg-white shadow-xl"><h4 class="text-xs font-black text-orange-600 uppercase border-b-2 border-orange-100 mb-6 pb-2">Rasio Keuangan (%)</h4><div class="grid grid-cols-2 gap-y-6 text-xs">
+                    <div><span class="opacity-50 uppercase text-[9px]">ROA</span><br><b class="text-lg">${d.roa}%</b></div><div><span class="opacity-50 uppercase text-[9px]">ROE</span><br><b class="text-lg">${d.roe}%</b></div><div><span class="opacity-50 uppercase text-[9px]">NPL Gross</span><br><b class="text-lg text-red-600">${d.nplg}%</b></div><div><span class="opacity-50 uppercase text-[9px]">NPL Net</span><br><b class="text-lg">${d.npln}%</b></div><div><span class="opacity-50 uppercase text-[9px]">NIM</span><br><b class="text-lg">${d.nim}%</b></div><div><span class="opacity-50 uppercase text-[9px]">BOPO</span><br><b class="text-lg">${d.bopo}%</b></div><div><span class="opacity-50 uppercase text-[9px]">LDR</span><br><b class="text-lg">${d.ldr}%</b></div><div><span class="opacity-50 uppercase text-[9px]">KPMM</span><br><b class="text-lg">${d.kpmm}%</b></div><div class="col-span-2 border-t pt-4 text-blue-600 font-black"><span class="uppercase text-[9px]">CASA (%)</span><br><b class="text-2xl">${d.casa}%</b></div>
+                </div></div>
+                <div class="p-8 border-2 border-emerald-50 rounded-[2.5rem] bg-emerald-50/20 shadow-inner"><h4 class="text-xs font-black text-emerald-600 uppercase border-b-2 border-emerald-100 mb-6 pb-2">Informasi Tambahan</h4><div class="space-y-4 font-bold text-sm">
+                    <p class="flex justify-between">Kredit UMKM: <b>${rf(d.umkm)}</b></p><p class="flex justify-between">Krd Non-UMKM: <b>${rf(d.nonUmkm)}</b></p><p class="flex justify-between text-emerald-700 font-black border-t pt-2">Porsi UMKM %: <b>${d.p_umkm}%</b></p><p class="flex justify-between">CKPN Kredit: <b>${rf(d.ckpnKredit)}</b></p><p class="flex justify-between">Nominal NPL: <b>${rf(d.nomNpl)}</b></p><p class="flex justify-between border-t pt-4 font-black text-blue-700 uppercase tracking-tight">Coverage CKPN NPL: <b>${d.p_cov}%</b></p>
+                </div></div>`;
+            document.getElementById('viewModal').style.display = 'flex';
+        }
+
+        function actionEdit(key) {
+            const d = currentData.find(x => x.dbKey === key); document.getElementById('bankSelection').value = d.sandi; document.getElementById('tahun').value = d.tahun; document.getElementById('bulan').value = d.bulan;
+            document.getElementById('aset').value = fR(d.aset); document.getElementById('kredit').value = fR(d.kredit); document.getElementById('giro').value = fR(d.giro); document.getElementById('tabungan').value = fR(d.tabungan); document.getElementById('deposito').value = fR(d.deposito); document.getElementById('laba').value = fR(d.laba); document.getElementById('ckpn').value = fR(d.ckpn); document.getElementById('modalInti').value = fR(d.modalInti); toggleForm();
+            if(d.kpmm) { document.getElementById('roa').value = d.roa; document.getElementById('roe').value = d.roe; document.getElementById('nplg').value = d.nplg; document.getElementById('npln').value = d.npln; document.getElementById('nim').value = d.nim; document.getElementById('bopo').value = d.bopo; document.getElementById('ldr').value = d.ldr; document.getElementById('kpmm').value = d.kpmm; document.getElementById('umkm').value = fR(d.umkm); document.getElementById('nonUmkm').value = fR(d.nonUmkm); document.getElementById('ckpnKredit').value = fR(d.ckpnKredit); document.getElementById('nomNpl').value = fR(d.nomNpl); }
+            calcLogic(); window.scrollTo({top:0, behavior:'smooth'});
+        }
+        async function actionDelete(key) { if(confirm("Hapus Permanen?")) { await fetch(`${FIREBASE_URL}/data/${key}.json`, { method:'DELETE' }); fetchFromCloud(); } }
         function sortTable(key) { sortOrder *= -1; currentData.sort((a,b) => (typeof (a[key]||0) === 'string' ? a[key].localeCompare(b[key]) : (b[key]||0) - (a[key]||0)) * sortOrder); renderUI(currentData); }
-        function changeMetric(m) { activeMetric = m; renderUI(currentData); }
-        
-        function downloadTemplate() {
-            const ws = XLSX.utils.aoa_to_sheet([["Nama Bank", "Tahun", "Bulan", "Aset", "Kredit", "Giro", "Tabungan", "Deposito", "Laba", "CKPN", "Modal Inti", "KPMM", "ROA", "ROE", "NPL Gross", "NPL Net", "BOPO", "NIM", "LDR", "Total UMKM", "Total Non UMKM", "CKPN Kredit", "Nominal NPL"]]);
-            if (!ws['!dataValidation']) ws['!dataValidation'] = [];
-            ws['!dataValidation'].push({ sqref: "A2:A100", type: "list", formula1: `"${DAFTAR_BPD.join(',')}"` });
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Template");
-            XLSX.writeFile(wb, "Template_BPD_v3_Final.xlsx");
-        }
-
-        async function importExcel(e) {
-            const rows = XLSX.utils.sheet_to_json(XLSX.read(await e.target.files[0].arrayBuffer(), {type:'array'}).Sheets["Template"]);
-            document.getElementById('loading').style.display = 'flex';
-            for(let r of rows) {
-                let n = (r["Nama Bank"]||"").toString().trim();
-                let bankMatch = DAFTAR_BPD.find(b => b.toUpperCase().replace(/\s/g,'') === n.toUpperCase().replace(/\s/g,'')) || n;
-                const g=r["Giro"]||0, t=r["Tabungan"]||0, d=r["Deposito"]||0, dpk=g+t+d, k=r["Kredit"]||0, u=r["Total UMKM"]||0, nu=r["Total Non UMKM"]||0, cn=r["CKPN Kredit"]||0, nn=r["Nominal NPL"]||0;
-                const id = `${bankMatch}-${r["Bulan"]}-${r["Tahun"]}`.replace(/\s/g, '_');
-                await fetch(`${FIREBASE_URL}/data/${id}.json`, { method:'PUT', body:JSON.stringify({ bank:bankMatch, tahun:parseInt(r["Tahun"]), bulan:parseInt(r["Bulan"]), aset:r["Aset"]||0, kredit:k, giro:g, tabungan:t, deposito:d, dpk:dpk, laba:r["Laba"]||0, ckpn:r["CKPN"]||0, modalInti:r["Modal Inti"]||0, kpmm:r["KPMM"]||0, roa:r["ROA"]||0, roe:r["ROE"]||0, nplg:r["NPL Gross"]||0, npln:r["NPL Net"]||0, bopo:r["BOPO"]||0, nim:r["NIM"]||0, ldr:r["LDR"]||0, casa:dpk>0?((g+t)/dpk*100).toFixed(2):0, umkm:u, nonUmkm:nu, p_umkm:k>0?((u/k)*100).toFixed(2):0, p_non:k>0?((nu/k)*100).toFixed(2):0, ckpnKredit:cn, nomNpl:nn, p_cov:cn>0?((nn/cn)*100).toFixed(2):0 }) });
-            }
-            document.getElementById('loading').style.display = 'none'; fetchFromCloud(); alert("Import Berhasil!");
-        }
-
-        function exportExcel() { XLSX.writeFile(XLSX.utils.book_new().constructor.call(null, { Sheets:{'Laporan':XLSX.utils.json_to_sheet(currentData)}, SheetNames:['Laporan'] }), `Laporan_BPD_2026.xlsx`); }
+        function changeMetric(m) { activeMetric = m; document.getElementById('chartTitle').innerText = "Visual Ranking Regional - " + m.toUpperCase(); renderUI(currentData); }
+        function downloadTemplate() { const ws = XLSX.utils.aoa_to_sheet([["Sandi Bank", "Nama Bank", "Tahun", "Bulan", "Aset", "Kredit", "Giro", "Tabungan", "Deposito", "Laba", "CKPN", "Modal Inti", "ROA", "ROE", "NPL Gross", "NPL Net", "NIM", "BOPO", "LDR", "KPMM", "Total UMKM", "Total Non UMKM", "CKPN Kredit", "Nominal NPL"]]); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Template"); XLSX.writeFile(wb, "Template_BPD_Master.xlsx"); }
+        async function importExcel(e) { const rows = XLSX.utils.sheet_to_json(XLSX.read(await e.target.files[0].arrayBuffer(), {type:'array'}).Sheets["Template"]); document.getElementById('loading').style.display = 'flex'; for(let r of rows) { const s = r["Sandi Bank"].toString(), key = `${s}-${r["Bulan"]}-${r["Tahun"]}`, g=r["Giro"]||0, t=r["Tabungan"]||0, d=r["Deposito"]||0, dpk=g+t+d, k=r["Kredit"]||0, ck=r["CKPN Kredit"]||0, nn=r["Nominal NPL"]||0; await fetch(`${FIREBASE_URL}/data/${key}.json`, { method:'PUT', body:JSON.stringify({ dbKey:key, sandi:s, bank:r["Nama Bank"], tahun:parseInt(r["Tahun"]), bulan:parseInt(r["Bulan"]), aset:r["Aset"]||0, kredit:k, giro:g, tabungan:t, deposito:d, dpk:dpk, laba:r["Laba"]||0, ckpn:r["CKPN"]||0, modalInti:r["Modal Inti"]||0, roa:r["ROA"]||0, roe:r["ROE"]||0, nplg:r["NPL Gross"]||0, npln:r["NPL Net"]||0, nim:r["NIM"]||0, bopo:r["BOPO"]||0, ldr:r["LDR"]||0, kpmm:r["KPMM"]||0, casa:dpk>0?((g+t)/dpk*100).toFixed(2):0, umkm:r["Total UMKM"]||0, nonUmkm:r["Total Non UMKM"]||0, ckpnKredit:ck, nomNpl:nn, p_cov: nn > 0 ? parseFloat(((ck/nn)*100).toFixed(2)) : 0, p_umkm: k > 0 ? parseFloat((r["Total UMKM"]/k*100).toFixed(2)) : 0 }) }); } document.getElementById('loading').style.display = 'none'; fetchFromCloud(); alert("Done!"); }
+        function exportModernExcel() { const formatted = currentData.map(i => ({ "Sandi": i.sandi, "Bank": i.bank, "Aset": i.aset, "Kredit": i.kredit, "Laba": i.laba, "DPK": i.dpk, "CASA%": i.casa, "NPL G%": i.nplg, "Coverage%": i.p_cov, "UMKM%": i.p_umkm })); XLSX.writeFile(XLSX.utils.book_new().constructor.call(null, { Sheets:{'Laporan':XLSX.utils.json_to_sheet(formatted)}, SheetNames:['Laporan'] }), `Laporan_BPD_Master.xlsx`); }
     </script>
 </body>
 </html>
