@@ -1,6 +1,30 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+// Gunakan Config Firebase yang SAMA dengan Portal Utama
+const firebaseConfig = {
+      apiKey: "AIzaSyAbRJOnNflibNNILN0fVdHv58DT9AfX7qY",
+  authDomain: "e-monitoring-bpd-bali.firebaseapp.com",
+  projectId: "e-monitoring-bpd-bali",
+  storageBucket: "e-monitoring-bpd-bali.firebasestorage.app",
+  messagingSenderId: "96169455366",
+  appId: "1:96169455366:web:b0730456a919a6e02af887",
+  measurementId: "G-3QV1N5V3KD"
+}; 
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Cek apakah user sudah login atau belum
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    // Jika tidak ada session login, tendang balik ke Portal Utama
+    window.location.href = "https://e-monitoring.netlify.app/?error=unauthorized";
+  }
+});
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BPD Analytica Master v3.7.0</title>
