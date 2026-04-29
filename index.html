@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPD SI Monitoring - Divisi OKA</title>
+    <title>BPD SI Monitoring</title>
 
     <style>
-        /* Sembunyikan seluruh halaman secara default untuk keamanan */
+        /* Mencegah kebocoran data sebelum login terverifikasi */
         html { display: none; }
     </style>
 
@@ -14,7 +14,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // Menggunakan Config yang sama dengan Portal Utama
         const firebaseConfig = {
             apiKey: "AIzaSyAbRJOnNflibNNILN0fVdHv58DT9AfX7qY",
             authDomain: "e-monitoring-bpd-bali.firebaseapp.com",
@@ -28,15 +27,21 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Cek status login sebelum merender halaman
+        // Fungsi pengecekan status login
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Jika user login ditemukan, munculkan halaman
+                // USER TERDETEKSI: Tampilkan halaman
                 document.documentElement.style.display = "block";
-                console.log("Akses diberikan untuk:", user.email);
             } else {
-                // Jika tidak login, tendang kembali ke Portal Utama
-                window.location.href = "https://e-monitoring.netlify.app/?status=unauthorized";
+                // USER TIDAK ADA: Tendang ke portal utama
+                // Kita tambahkan sedikit delay agar Firebase punya waktu mencari session
+                setTimeout(() => {
+                    if (!auth.currentUser) {
+                        window.location.href = "https://e-monitoring.netlify.app/?status=unauthorized";
+                    } else {
+                        document.documentElement.style.display = "block";
+                    }
+                }, 1500); 
             }
         });
     </script>
@@ -45,29 +50,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body class="bg-slate-50 min-h-screen">
-
-    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <span class="text-2xl">📊</span>
-                <h1 class="font-black text-slate-800 tracking-tighter uppercase">BPD SI Monitoring</h1>
-            </div>
-            <a href="https://e-monitoring.netlify.app/" class="text-xs font-bold text-slate-400 hover:text-blue-600 transition">KEMBALI KE PORTAL</a>
-        </div>
-    </nav>
-
-    <main class="p-8 max-w-7xl mx-auto">
-        <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-            <h2 class="text-xl font-bold mb-4">Selamat Datang di Dashboard BPD SI</h2>
-            <p class="text-slate-500 text-sm">Halaman ini hanya dapat diakses oleh user yang telah login melalui Portal E-Monitoring.</p>
-            
-            </div>
-    </main>
-
-    <script>
-        // Masukkan skrip logika aplikasi (Chart.js, Kalkulasi, dll) di sini
-        console.log("Aplikasi BPD SI SIap.");
-    </script>
+<body class="bg-slate-50">
+    <div class="p-10">
+        <h1 class="text-2xl font-bold">Dashboard BPD SI</h1>
+        <p>Jika Anda melihat ini, berarti Anda berhasil login.</p>
+        <a href="https://e-monitoring.netlify.app/" class="text-blue-500 underline">Kembali ke Portal</a>
+    </div>
 </body>
 </html>
