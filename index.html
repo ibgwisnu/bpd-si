@@ -6,13 +6,14 @@
     <title>BPD SI Monitoring</title>
 
     <style>
-        /* Mencegah kebocoran data sebelum login terverifikasi */
-        html { display: none; }
+        /* Sembunyikan halaman agar tidak berkedip (flash) */
+        html { display: none; background-color: #f8fafc; }
     </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAbRJOnNflibNNILN0fVdHv58DT9AfX7qY",
@@ -20,28 +21,48 @@
             projectId: "e-monitoring-bpd-bali",
             storageBucket: "e-monitoring-bpd-bali.firebasestorage.app",
             messagingSenderId: "96169455366",
-            appId: "1:96169455366:web:b0730456a919a6e02af887",
-            measurementId: "G-3QV1N5V3KD"
+            appId: "1:96169455366:web:b0730456a919a6e02af887"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // Fungsi pengecekan status login
-        onAuthStateChanged(auth, (user) => {
+        // Fungsi pengecekan keamanan
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // USER TERDETEKSI: Tampilkan halaman
-                document.documentElement.style.display = "block";
+                try {
+                    // Ambil NRK dari email
+                    const nrk = user.email.split('@')[0];
+                    const userDocRef = doc(db, "users", nrk);
+                    const userSnap = await getDoc(userDocRef);
+
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        
+                        // Cek apakah user sudah di-approve oleh Pak Wisnu
+                        if (userData.status === "approved" || userData.role === "superadmin") {
+                            document.documentElement.style.display = "block";
+                        } else {
+                            alert("Akun Anda terdaftar namun belum disetujui Admin.");
+                            window.location.href = "https://e-monitoring.netlify.app/?status=pending";
+                        }
+                    } else {
+                        // Jika data di Firestore tidak ada
+                        window.location.href = "https://e-monitoring.netlify.app/?status=no_profile";
+                    }
+                } catch (error) {
+                    console.error("Auth Error:", error);
+                    window.location.href = "https://e-monitoring.netlify.app/?status=error";
+                }
             } else {
-                // USER TIDAK ADA: Tendang ke portal utama
-                // Kita tambahkan sedikit delay agar Firebase punya waktu mencari session
+                // Jika setelah ditunggu sesi login tetap tidak ada
+                // Beri waktu 2 detik (2000ms) untuk Firebase mencari cookie login
                 setTimeout(() => {
                     if (!auth.currentUser) {
                         window.location.href = "https://e-monitoring.netlify.app/?status=unauthorized";
-                    } else {
-                        document.documentElement.style.display = "block";
                     }
-                }, 1500); 
+                }, 2000);
             }
         });
     </script>
@@ -50,11 +71,25 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body class="bg-slate-50">
-    <div class="p-10">
-        <h1 class="text-2xl font-bold">Dashboard BPD SI</h1>
-        <p>Jika Anda melihat ini, berarti Anda berhasil login.</p>
-        <a href="https://e-monitoring.netlify.app/" class="text-blue-500 underline">Kembali ke Portal</a>
-    </div>
+<body class="bg-slate-50 font-sans">
+    
+    <nav class="bg-white border-b border-slate-200 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🏦</span>
+                <span class="font-black text-slate-800 tracking-tighter uppercase">BPD SI Dashboard</span>
+            </div>
+            <a href="https://e-monitoring.netlify.app/" class="text-xs font-bold text-blue-600 border border-blue-100 px-4 py-2 rounded-full hover:bg-blue-50 transition">
+                KEMBALI KE PORTAL
+            </a>
+        </div>
+    </nav>
+
+    <main class="p-8 max-w-7xl mx-auto">
+        <div id="dashboard-content">
+            <h1 class="text-xl font-bold">Memuat Data Monitoring...</h1>
+        </div>
+    </main>
+
 </body>
 </html>
